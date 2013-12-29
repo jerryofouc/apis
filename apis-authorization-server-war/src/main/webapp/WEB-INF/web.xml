@@ -55,6 +55,7 @@
     <url-pattern>/admin/*</url-pattern>
   </filter-mapping>
 
+    <!--这个地方把filter用spring进行了管理，使用了Proxy的设计模式，deletegate到相应的fiter中进行了处理-->
   <filter>
     <filter-name>oauth2AuthenticationFilter</filter-name>
     <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>

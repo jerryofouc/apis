@@ -38,6 +38,7 @@ import org.surfnet.oaaas.auth.principal.AuthenticatedPrincipal;
 import org.surfnet.oaaas.model.AccessToken;
 import org.surfnet.oaaas.model.AuthorizationRequest;
 import org.surfnet.oaaas.model.Client;
+import org.surfnet.oaaas.model.ResourceOwner;
 import org.surfnet.oaaas.repository.AccessTokenRepository;
 import org.surfnet.oaaas.repository.AuthorizationRequestRepository;
 
@@ -76,15 +77,18 @@ public class FormUserConsentHandler extends AbstractUserConsentHandler {
   private void processInitial(HttpServletRequest request, ServletResponse response, FilterChain chain,
       String returnUri, String authStateValue, Client client) throws IOException, ServletException {
     AuthenticatedPrincipal principal = (AuthenticatedPrincipal) request.getAttribute(AbstractAuthenticator.PRINCIPAL);
-    List<AccessToken> tokens = accessTokenRepository.findByResourceOwnerIdAndClient(principal.getName(), client);
-    if (!CollectionUtils.isEmpty(tokens)) {
+    ResourceOwner resourceOwner = (ResourceOwner)request.getSession().getAttribute(AbstractAuthenticator.RESOURCE_OWNER_KEY);
+    List<AccessToken> tokens = accessTokenRepository.findByResourceOwnerAndClient(resourceOwner, client);
+    if (!CollectionUtils.isEmpty(tokens)) { //TODO 这个地方是对API的限制，还需要改正
       // If another token is already present for this resource owner and client, no new consent should be requested
       List<String> grantedScopes = tokens.get(0).getScopes(); // take the scopes of the first access token found.
       setGrantedScopes(request, grantedScopes.toArray(new String[grantedScopes.size()]));
       chain.doFilter(request, response);
     } else {
       AuthorizationRequest authorizationRequest = authorizationRequestRepository.findByAuthState(authStateValue);
-      request.setAttribute("requestedScopes", authorizationRequest.getRequestedScopes());
+    //  request.setAttribute("requestedScopes", authorizationRequest.getRequestedScopes());
+
+
       request.setAttribute("client", client);
       request.setAttribute(AUTH_STATE, authStateValue);
       request.setAttribute("actionUri", returnUri);

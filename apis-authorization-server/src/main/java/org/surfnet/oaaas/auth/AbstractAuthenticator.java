@@ -32,6 +32,7 @@ import org.surfnet.oaaas.auth.principal.AuthenticatedPrincipal;
  * To be implemented by various authentication methods.
  */
 public abstract class AbstractAuthenticator extends AbstractFilter {
+  public static final String RESOURCE_OWNER_KEY = "RESOURCE_OWNER_KEY";
 
   /**
    * The constant that contains the principal, set by concrete authenticators
@@ -55,7 +56,7 @@ public abstract class AbstractAuthenticator extends AbstractFilter {
    *
    * @param request the HttpServletRequest
    */
-  public abstract boolean canCommence(HttpServletRequest request);
+  public abstract boolean  canCommence(HttpServletRequest request);
 
 
   /**

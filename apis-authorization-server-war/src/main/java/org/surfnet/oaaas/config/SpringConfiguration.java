@@ -35,6 +35,7 @@ import javax.validation.Validator;
 import java.util.Arrays;
 import java.util.List;
 
+
 /**
  * The SpringConfiguration is a {@link Configuration} that can be overridden if
  * you want to plugin your own implementations. Note that the two most likely
@@ -42,6 +43,7 @@ import java.util.List;
  * {@link AbstractUserConsentHandler}. You can change the implementation by
  * editing the application.apis.properties file where the implementations are
  * configured.
+ * 使用spring 文件
  */
 @Configuration
 @PropertySource("classpath:apis.application.properties")

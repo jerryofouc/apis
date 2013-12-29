@@ -1,9 +1,15 @@
+/**
+*插入resource server
+ */
 INSERT INTO resourceserver (id, contactEmail,  contactName, resourceServerName, resourceServerKey,secret, thumbNailUrl )
 VALUES
 	(99999, 'foo@university.org','foo.bar','university-foo','university-foo',
 	'58b749f7-acb3-44b7-a38c-53d5ad740cf6','https://raw.github.com/OpenConextApps/apis/master/apis-images/university.png' );
 INSERT INTO Resourceserver_scopes values (99999, 'read');
 
+/**
+ *插入一个client
+ */
 INSERT INTO client (id, clientId, contactEmail, contactName, description, expireDuration, 
 					clientName, secret, skipConsent, thumbNailUrl,
 					useRefreshTokens, resourceserver_id)

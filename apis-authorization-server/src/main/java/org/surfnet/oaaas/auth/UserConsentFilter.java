@@ -27,6 +27,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.lang.StringUtils;
 import org.surfnet.oaaas.auth.principal.AuthenticatedPrincipal;
 import org.surfnet.oaaas.model.AuthorizationRequest;
+import org.surfnet.oaaas.model.ResourceOwner;
 import org.surfnet.oaaas.repository.AuthorizationRequestRepository;
 
 /**
@@ -42,6 +43,7 @@ public class UserConsentFilter implements Filter {
 
   @Inject
   private AuthorizationRequestRepository authorizationRequestRepository;
+
 
   private AbstractUserConsentHandler userConsentHandler;
 

@@ -23,6 +23,7 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 import org.surfnet.oaaas.model.AccessToken;
 import org.surfnet.oaaas.model.Client;
+import org.surfnet.oaaas.model.ResourceOwner;
 
 @Repository
 public interface AccessTokenRepository extends CrudRepository<AccessToken, Long> {
@@ -31,7 +32,7 @@ public interface AccessTokenRepository extends CrudRepository<AccessToken, Long>
 
   AccessToken findByRefreshToken(String refreshToken);
 
-  List<AccessToken> findByResourceOwnerIdAndClient(String resourceOwnerId, Client client);
+  List<AccessToken> findByResourceOwnerAndClient(ResourceOwner resourceOwner, Client client);
 
   List<AccessToken> findByResourceOwnerId(String resourceOwnerId);
 

@@ -66,15 +66,17 @@ public class AccessToken extends AbstractEntity {
   @XmlTransient
   private Client client;
 
+  @ManyToOne(optional = false)
+  @JoinColumn(name = "resourceowner_id", nullable = false, updatable = false)
+  @XmlTransient
+  private ResourceOwner resourceOwner;
+
   @Column
   private long expires;
 
   @ElementCollection(fetch= FetchType.EAGER)
   private List<String> scopes;
 
-  @Column
-  @NotNull
-  private String resourceOwnerId;
 
   public AccessToken() {
     super();
@@ -90,7 +92,6 @@ public class AccessToken extends AbstractEntity {
     this.token = token;
     this.principal = principal;
     this.encodePrincipal();
-    this.resourceOwnerId = principal.getName();
     this.client = client;
     this.expires = expires;
     this.scopes = scopes;
@@ -211,16 +212,17 @@ public class AccessToken extends AbstractEntity {
     this.refreshToken = refreshToken;
   }
 
-  /**
-   * @return the resourceOwnerId
-   */
-  public String getResourceOwnerId() {
-    return resourceOwnerId;
-  }
 
   @XmlElement
   public String getClientId() {
     return client.getClientId();
   }
 
+    public ResourceOwner getResourceOwner() {
+        return resourceOwner;
+    }
+
+    public void setResourceOwner(ResourceOwner resourceOwner) {
+        this.resourceOwner = resourceOwner;
+    }
 }
