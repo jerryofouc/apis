@@ -29,7 +29,7 @@ public class ResourceOwnerToAccessRestApi {
     private Long id;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "resourceowner_id", nullable = false, updatable = false)
+    @JoinColumn(name = "resource_owner_id", nullable = false, updatable = false)
     @XmlTransient
     private ResourceOwner resourceOwner;
 

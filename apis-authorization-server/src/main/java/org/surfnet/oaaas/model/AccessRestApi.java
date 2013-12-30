@@ -29,10 +29,7 @@ public class AccessRestApi extends AbstractEntity{
     @XmlTransient
     private ResourceServer resourceServer;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "resourceowner_id", nullable = false, updatable = false)
-    @XmlTransient
-    private ResourceOwner resourceOwner;
+
 
     public String getCompleteUrl() {
         return completeUrl;
@@ -50,11 +47,4 @@ public class AccessRestApi extends AbstractEntity{
         this.resourceServer = resourceServer;
     }
 
-    public ResourceOwner getResourceOwner() {
-        return resourceOwner;
-    }
-
-    public void setResourceOwner(ResourceOwner resourceOwner) {
-        this.resourceOwner = resourceOwner;
-    }
 }
