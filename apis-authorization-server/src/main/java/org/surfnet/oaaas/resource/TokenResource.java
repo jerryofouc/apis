@@ -18,7 +18,11 @@
  */
 package org.surfnet.oaaas.resource;
 
+import com.google.common.base.Joiner;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import com.sun.jersey.api.client.ClientResponse.Status;
+import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -31,8 +35,8 @@ import org.surfnet.oaaas.auth.ValidationResponseException;
 import org.surfnet.oaaas.auth.principal.AuthenticatedPrincipal;
 import org.surfnet.oaaas.auth.principal.UserPassCredentials;
 import org.surfnet.oaaas.model.*;
-import org.surfnet.oaaas.repository.AccessTokenRepository;
-import org.surfnet.oaaas.repository.AuthorizationRequestRepository;
+import org.surfnet.oaaas.repository.*;
+import org.surfnet.oaaas.utils.AES;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -40,6 +44,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
 import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
 
 import static org.surfnet.oaaas.auth.OAuth2Validator.*;
@@ -61,7 +66,16 @@ public class TokenResource {
   private AuthorizationRequestRepository authorizationRequestRepository;
 
   @Inject
+  private ResourceOwnerRepository resourceOwnerRepository;
+
+  @Inject
   private AccessTokenRepository accessTokenRepository;
+
+  @Inject
+  private AccessTokenToAccessRestApiRepository accessTokenToAccessRestApiRepository;
+
+  @Inject
+  private AccessRestApiRepository accessRestApiRepository;
 
   @Inject
   private OAuth2Validator oAuth2Validator;
@@ -112,11 +126,13 @@ public class TokenResource {
       return serverError("Not a valid AbstractAuthenticator.AUTH_STATE on the Request");
     }
     processScopes(authReq, request);
+    List<String> apiList = (List<String>)request.getAttribute(AbstractUserConsentHandler.GRANTED_APIS);
+
     if (authReq.getResponseType().equals(OAuth2Validator.IMPLICIT_GRANT_RESPONSE_TYPE)) {
-      AccessToken token = createAccessToken(authReq, true);
+      AccessToken token = createAccessToken( authReq, true);
       return sendImplicitGrantResponse(authReq, token);
     } else {
-      return sendAuthorizationCodeResponse(authReq);
+      return sendAuthorizationCodeResponse(apiList,authReq);
     }
   }
 
@@ -129,24 +145,54 @@ public class TokenResource {
       // authorizationRequest.
       authReq.setGrantedScopes(authReq.getRequestedScopes());
     } else {
-      String[] scopes = (String[]) request.getAttribute(AbstractUserConsentHandler.GRANTED_SCOPES);
-      if (!ArrayUtils.isEmpty(scopes)) {
-        authReq.setGrantedScopes(Arrays.asList(scopes));
+      List<String> grantedAPIS = (List<String>) request.getAttribute(AbstractUserConsentHandler.GRANTED_APIS);
+      if (grantedAPIS!=null && !grantedAPIS.isEmpty()) {
+        authReq.setGrantedScopes(grantedAPIS);
       } else {
         authReq.setGrantedScopes(null);
       }
     }
   }
 
-  private AccessToken createAccessToken(AuthorizationRequest request, boolean isImplicitGrant) {
+  private AccessToken createAccessToken( AuthorizationRequest request, boolean isImplicitGrant) {
     Client client = request.getClient();
+    Preconditions.checkNotNull(client);
+    ResourceServer resourceServer = client.getResourceServer();
+    Preconditions.checkNotNull(resourceServer);
+      final String secret = resourceServer.getSecret();
+      List<AccessRestApi> accessRestApiList = Lists.newArrayList();
+      List<String> completeUrlList = Lists.newArrayList();
+      for(String apidId : request.getGrantedScopes()){
+          AccessRestApi accessRestApi = accessRestApiRepository.findOne(Long.parseLong(apidId));
+          accessRestApiList.add(accessRestApi);
+          completeUrlList.add(accessRestApi.getCompleteUrl());
+      }
     long expireDuration = client.getExpireDuration();
     long expires = (expireDuration == 0L ? 0L : (System.currentTimeMillis() + (1000 * expireDuration)));
-    String refreshToken = (client.isUseRefreshTokens() && !isImplicitGrant) ? getTokenValue(true) : null;
+    String refreshToken = (client.isUseRefreshTokens() && !isImplicitGrant) ? getTokenValue(completeUrlList,secret,true) : null;
     AuthenticatedPrincipal principal = request.getPrincipal();
-    AccessToken token = new AccessToken(getTokenValue(false), principal, client, expires,
+
+    for(String apidId : request.getGrantedScopes()){
+        AccessRestApi accessRestApi = accessRestApiRepository.findOne(Long.parseLong(apidId));
+        accessRestApiList.add(accessRestApi);
+        completeUrlList.add(accessRestApi.getCompleteUrl());
+    }
+    AuthenticatedPrincipal authenticatedPrincipal = request.getPrincipal();
+    String uniqueName = authenticatedPrincipal.getName();
+
+    AccessToken token = new AccessToken(getTokenValue(completeUrlList,secret,false), principal, client, expires,
         request.getGrantedScopes(), refreshToken);
-    return accessTokenRepository.save(token);
+    ResourceOwner resourceOwner = resourceOwnerRepository.findByName(uniqueName);
+    token.setResourceOwner(resourceOwner);
+    token = accessTokenRepository.save(token);
+    for(String apidId : request.getGrantedScopes()){
+        AccessRestApi accessRestApi = accessRestApiRepository.findOne(Long.parseLong(apidId));
+        AccessTokenToAccessRestApi accessTokenToAccessRestApi = new AccessTokenToAccessRestApi();
+        accessTokenToAccessRestApi.setAccessRestApi(accessRestApi);
+        accessTokenToAccessRestApi.setAccessToken(token);
+        accessTokenToAccessRestApiRepository.save(accessTokenToAccessRestApi);
+    }
+    return token;
   }
 
   private AuthorizationRequest findAuthorizationRequest(HttpServletRequest request) {
@@ -242,21 +288,38 @@ public class TokenResource {
         accessTokenRequest.getClientSecret()) : new UserPassCredentials(authorization);
   }
 
-  private Response sendAuthorizationCodeResponse(AuthorizationRequest authReq) {
+  private Response sendAuthorizationCodeResponse(List<String> apiList, AuthorizationRequest authReq) {
     String uri = authReq.getRedirectUri();
-    String authorizationCode = getAuthorizationCodeValue();
+    Client client = authReq.getClient();
+    Preconditions.checkNotNull(client);
+      ResourceServer resourceServer = client.getResourceServer();
+      Preconditions.checkNotNull(resourceServer);
+      final String secret = resourceServer.getSecret();
+      List<AccessRestApi> accessRestApiList = Lists.newArrayList();
+      List<String> completeUrlList = Lists.newArrayList();
+      if(apiList == null){
+          apiList = Lists.newArrayList();
+      }
+      for(String apidId : apiList){
+          AccessRestApi accessRestApi = accessRestApiRepository.findOne(Long.parseLong(apidId));
+          accessRestApiList.add(accessRestApi);
+          completeUrlList.add(accessRestApi.getCompleteUrl());
+      }
+    String authorizationCode = getTokenValue(completeUrlList,secret,false);
     authReq.setAuthorizationCode(authorizationCode);
-    authorizationRequestRepository.save(authReq);
+    authReq = authorizationRequestRepository.save(authReq);
     uri = uri + appendQueryMark(uri) + "code=" + authorizationCode + appendStateParameter(authReq);
     return Response.seeOther(UriBuilder.fromUri(uri).build()).build();
   }
 
-  protected String getTokenValue(boolean isRefreshToken) {
-    return UUID.randomUUID().toString();
-  }
-
-  protected String getAuthorizationCodeValue() {
-    return getTokenValue(false);
+  protected String getTokenValue(List<String> allURLs,String secret,boolean isRefresh) {
+    String allAccessURL = Joiner.on(",").join(allURLs);
+      try {
+          return Hex.encodeHexString(AES.encrypt(allAccessURL,secret)) ;
+      } catch (Exception e) {
+          e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+      }
+      return null;
   }
 
   private Response sendErrorResponse(String error, String description) {

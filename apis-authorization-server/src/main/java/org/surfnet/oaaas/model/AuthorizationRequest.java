@@ -71,6 +71,7 @@ public class AuthorizationRequest extends AbstractEntity {
   @ElementCollection(fetch = FetchType.EAGER)
   private List<String> grantedScopes = new ArrayList<String>();
 
+
   @Column
   private String state;
 
@@ -254,6 +255,9 @@ public class AuthorizationRequest extends AbstractEntity {
    * @return the principal
    */
   public AuthenticatedPrincipal getPrincipal() {
+    if(this.principal == null){
+        decodePrincipal();
+    }
     return principal;
   }
 

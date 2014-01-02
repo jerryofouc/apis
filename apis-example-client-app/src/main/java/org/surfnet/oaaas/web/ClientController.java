@@ -187,7 +187,7 @@ public class ClientController {
     ClientSettings settings = new ClientSettings(tokenUri, clientId, clientSecret, authorizeUrl, "step1", resourceServerApiUrl);
     settings.setAuthorizationURLComplete(String.format(
             settings.getAuthorizationURL()
-                    .concat("?response_type=%s&client_id=%s&redirect_uri=%s&scope=read&state=example"), responseType, settings
+                    .concat("?response_type=%s&client_id=%s&redirect_uri=%s&scope=report&state=example"), responseType, settings
             .getOauthKey(), redirectUri));
     return settings;
 

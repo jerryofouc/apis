@@ -19,7 +19,10 @@
 package org.surfnet.oaaas.consent;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -29,18 +32,17 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.google.common.collect.Lists;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.http.HttpMethod;
 import org.surfnet.oaaas.auth.AbstractAuthenticator;
 import org.surfnet.oaaas.auth.AbstractUserConsentHandler;
 import org.surfnet.oaaas.auth.principal.AuthenticatedPrincipal;
-import org.surfnet.oaaas.model.AccessToken;
-import org.surfnet.oaaas.model.AuthorizationRequest;
-import org.surfnet.oaaas.model.Client;
-import org.surfnet.oaaas.model.ResourceOwner;
+import org.surfnet.oaaas.model.*;
 import org.surfnet.oaaas.repository.AccessTokenRepository;
 import org.surfnet.oaaas.repository.AuthorizationRequestRepository;
+import org.surfnet.oaaas.repository.ResourceOwnerRepository;
 
 /**
  * Example {@link AbstractUserConsentHandler} that forwards to a form.
@@ -56,6 +58,9 @@ public class FormUserConsentHandler extends AbstractUserConsentHandler {
 
   @Inject
   private AuthorizationRequestRepository authorizationRequestRepository;
+
+  @Inject
+  private ResourceOwnerRepository resourceOwnerRepository;
 
   @Override
   public void handleUserConsent(HttpServletRequest request, HttpServletResponse response, FilterChain chain,
@@ -79,22 +84,21 @@ public class FormUserConsentHandler extends AbstractUserConsentHandler {
     AuthenticatedPrincipal principal = (AuthenticatedPrincipal) request.getAttribute(AbstractAuthenticator.PRINCIPAL);
     ResourceOwner resourceOwner = (ResourceOwner)request.getSession().getAttribute(AbstractAuthenticator.RESOURCE_OWNER_KEY);
     List<AccessToken> tokens = accessTokenRepository.findByResourceOwnerAndClient(resourceOwner, client);
-    if (!CollectionUtils.isEmpty(tokens)) { //TODO 这个地方是对API的限制，还需要改正
+    if (!CollectionUtils.isEmpty(tokens)) { //TODO 这个地方应该是对API的限制，还需要改正
       // If another token is already present for this resource owner and client, no new consent should be requested
       List<String> grantedScopes = tokens.get(0).getScopes(); // take the scopes of the first access token found.
       setGrantedScopes(request, grantedScopes.toArray(new String[grantedScopes.size()]));
       chain.doFilter(request, response);
     } else {
       AuthorizationRequest authorizationRequest = authorizationRequestRepository.findByAuthState(authStateValue);
+      List<AccessRestApi> apiList = resourceOwnerRepository.findAccessApisById(resourceOwner.getId());
+      request.setAttribute("apiList",apiList);
     //  request.setAttribute("requestedScopes", authorizationRequest.getRequestedScopes());
-
-
       request.setAttribute("client", client);
       request.setAttribute(AUTH_STATE, authStateValue);
       request.setAttribute("actionUri", returnUri);
       request.getRequestDispatcher(getUserConsentUrl()).forward(request, response);
     }
-
   }
 
   /**
@@ -112,8 +116,11 @@ public class FormUserConsentHandler extends AbstractUserConsentHandler {
       throws ServletException, IOException {
     if (Boolean.valueOf(request.getParameter(USER_OAUTH_APPROVAL))) {
       setAuthStateValue(request, request.getParameter(AUTH_STATE));
-      String[] scopes = request.getParameterValues(GRANTED_SCOPES);
-      setGrantedScopes(request, scopes);
+      String[] apis = request.getParameterValues(GRANTED_APIS);
+      List<String> apiList = (apis==null?(new ArrayList<String>()):Arrays.asList(apis));
+      setGrantedApis(request,apiList);
+     // String[] scopes = request.getParameterValues(GRANTED_APIS);
+    //  setGrantedScopes(request, scopes);
       return true;
     } else {
       request.getRequestDispatcher(getUserConsentDeniedUrl()).forward(request, response);
@@ -128,4 +135,8 @@ public class FormUserConsentHandler extends AbstractUserConsentHandler {
     return "/WEB-INF/jsp/userconsent_denied.jsp";
   }
 
+  public void setGrantedApis(HttpServletRequest request, List<String> grantedApis) {
+      request.setAttribute(AbstractUserConsentHandler.GRANTED_APIS,grantedApis);
+
+  }
 }

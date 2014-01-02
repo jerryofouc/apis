@@ -42,8 +42,8 @@ public class NoopUserConsentHandler extends AbstractUserConsentHandler {
   public void handleUserConsent(HttpServletRequest request, HttpServletResponse response, FilterChain chain,
       String authStateValue, String returnUri, Client client) throws IOException, ServletException {
     super.setAuthStateValue(request, authStateValue);
-    super.setGrantedScopes(request, client.getScopes().isEmpty() ? new String[]{ } : client.getScopes().toArray(new
-        String[client.getScopes().size()]));
+  //  super.setGrantedScopes(request, client.getScopes().isEmpty() ? new String[]{ } : client.getScopes().toArray(new
+   //     String[client.getScopes().size()]));
     chain.doFilter(request, response);
 
   }

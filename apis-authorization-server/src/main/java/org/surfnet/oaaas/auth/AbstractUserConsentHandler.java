@@ -37,6 +37,7 @@ public abstract class AbstractUserConsentHandler extends AbstractFilter {
    * and consumed by the authorization endpoint.
    */
   public static final String GRANTED_SCOPES = "GRANTED_SCOPES";
+  public static final String GRANTED_APIS =  "GRANTED_APIS";
 
   /**
    * Constant to get the Client when the control should be returned to the

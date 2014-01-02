@@ -19,6 +19,7 @@
 package org.surfnet.oaaas.authentication;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -92,7 +93,7 @@ public class FormLoginAuthenticator extends AbstractAuthenticator {
                 request.getRequestDispatcher("/WEB-INF/error/403.jsp").forward(request,response);
                 return false;
             }
-            Set<AccessRestApi> accessRestApiSet =  resourceOwner.getAccessRestApiSet();
+            List<AccessRestApi> accessRestApiSet =  resourceOwnerRepository.findAccessApisById(resourceOwner.getId());
             if(accessRestApiSet == null || accessRestApiSet.isEmpty()){//访问api为空
                 request.getRequestDispatcher("/WEB-INF/error/403.jsp").forward(request,response);
                 return false;
