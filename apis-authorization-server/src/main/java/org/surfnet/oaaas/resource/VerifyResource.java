@@ -80,7 +80,7 @@ public class VerifyResource implements EnvironmentAware {
     }
 
     ResourceServer resourceServer = getResourceServer(credentials);
-    if (resourceServer == null || !resourceServer.getSecret().equals(credentials.getPassword())) {
+    if (resourceServer == null/** || !resourceServer.getSecret().equals(credentials.getPassword())**/) {
       LOG.warn("For access token {}: Resource server not found for credentials {}. Responding with 401 in VerifyResource#verifyToken.", accessToken, credentials);
       return unauthorized();
     }

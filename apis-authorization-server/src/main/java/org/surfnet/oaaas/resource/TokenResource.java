@@ -162,20 +162,23 @@ public class TokenResource {
       final String secret = resourceServer.getSecret();
       List<AccessRestApi> accessRestApiList = Lists.newArrayList();
       List<String> completeUrlList = Lists.newArrayList();
-      for(String apidId : request.getGrantedScopes()){
-          AccessRestApi accessRestApi = accessRestApiRepository.findOne(Long.parseLong(apidId));
-          accessRestApiList.add(accessRestApi);
-          completeUrlList.add(accessRestApi.getCompleteUrl());
+      if(request.getGrantedScopes() != null){
+          for(String apidId : request.getGrantedScopes()){
+              AccessRestApi accessRestApi = accessRestApiRepository.findOne(Long.parseLong(apidId));
+              accessRestApiList.add(accessRestApi);
+              completeUrlList.add(accessRestApi.getCompleteUrl());
+          }
       }
     long expireDuration = client.getExpireDuration();
     long expires = (expireDuration == 0L ? 0L : (System.currentTimeMillis() + (1000 * expireDuration)));
     String refreshToken = (client.isUseRefreshTokens() && !isImplicitGrant) ? getTokenValue(completeUrlList,secret,true) : null;
     AuthenticatedPrincipal principal = request.getPrincipal();
-
-    for(String apidId : request.getGrantedScopes()){
-        AccessRestApi accessRestApi = accessRestApiRepository.findOne(Long.parseLong(apidId));
-        accessRestApiList.add(accessRestApi);
-        completeUrlList.add(accessRestApi.getCompleteUrl());
+    if(request.getGrantedScopes() != null){
+        for(String apidId : request.getGrantedScopes()){
+            AccessRestApi accessRestApi = accessRestApiRepository.findOne(Long.parseLong(apidId));
+            accessRestApiList.add(accessRestApi);
+            completeUrlList.add(accessRestApi.getCompleteUrl());
+        }
     }
     AuthenticatedPrincipal authenticatedPrincipal = request.getPrincipal();
     String uniqueName = authenticatedPrincipal.getName();
@@ -313,13 +316,16 @@ public class TokenResource {
   }
 
   protected String getTokenValue(List<String> allURLs,String secret,boolean isRefresh) {
-    String allAccessURL = Joiner.on(",").join(allURLs);
-      try {
-          return Hex.encodeHexString(AES.encrypt(allAccessURL,secret)) ;
-      } catch (Exception e) {
-          e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-      }
-      return null;
+        return UUID.randomUUID().toString();
+ //TODO 用加密解密模块来做
+//    String allAccessURL = Joiner.on(",").join(allURLs);
+//      UUID rand = UUID.randomUUID();
+//      try {
+//          return Hex.encodeHexString(AES.encrypt(rand + ":" + allAccessURL,secret)) ;
+//      } catch (Exception e) {
+//          e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+//      }
+//      return null;
   }
 
   private Response sendErrorResponse(String error, String description) {

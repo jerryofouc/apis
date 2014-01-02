@@ -25,6 +25,7 @@ import javax.persistence.*;
 import javax.validation.ConstraintValidatorContext;
 import javax.validation.constraints.NotNull;
 
+import com.google.common.collect.Lists;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.SerializationUtils;
 import org.apache.commons.lang.StringUtils;
@@ -180,7 +181,10 @@ public class AuthorizationRequest extends AbstractEntity {
    * @return the granted scopes
    */
   public List<String> getGrantedScopes() {
-    return grantedScopes;
+    if(grantedScopes == null){
+        return Lists.newArrayList();
+    }
+    return  grantedScopes;
   }
 
   /**

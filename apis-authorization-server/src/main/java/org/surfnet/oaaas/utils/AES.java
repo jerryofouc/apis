@@ -14,7 +14,7 @@ import javax.crypto.spec.SecretKeySpec;
 public class AES {
 
     public static byte[] encrypt(String plainText, String encryptionKey) throws Exception {
-        plainText = plaintext + "\0\0\0";
+        plainText = plainText + "\0\0\0";
         Cipher cipher = Cipher.getInstance("AES/CBC/NoPadding", "SunJCE");
      //   System.out.println(encryptionKey.getBytes("UTF-8").length);
         SecretKeySpec key = new SecretKeySpec(encryptionKey.getBytes("UTF-8"), "AES");

@@ -24,6 +24,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.surfnet.oaaas.auth.*;
 import org.surfnet.oaaas.repository.ExceptionTranslator;
 import org.surfnet.oaaas.repository.OpenJPAExceptionTranslator;
@@ -54,6 +55,7 @@ import java.util.List;
 @ComponentScan(basePackages = {"org.surfnet.oaaas.resource"})
 @ImportResource("classpath:spring-repositories.xml")
 @EnableTransactionManagement
+@EnableWebMvc
 public class SpringConfiguration {
 
   private static final String PERSISTENCE_UNIT_NAME = "oaaas";
@@ -113,6 +115,8 @@ public class SpringConfiguration {
     userConsentFilter.setUserConsentHandler(userConsentHandler());
     return userConsentFilter;
   }
+
+
 
   @Bean
   public OAuth2Validator oAuth2Validator() {
