@@ -17,6 +17,7 @@
 package org.surfnet.oaaas.config;
 
 import com.googlecode.flyway.core.Flyway;
+import com.netease.backend.bigdata.apis.filter.ManageLoginFilter;
 import org.apache.openjpa.persistence.PersistenceProviderImpl;
 import org.apache.tomcat.jdbc.pool.DataSource;
 import org.springframework.context.annotation.*;
@@ -24,7 +25,6 @@ import org.springframework.core.env.Environment;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
-import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.surfnet.oaaas.auth.*;
 import org.surfnet.oaaas.repository.ExceptionTranslator;
 import org.surfnet.oaaas.repository.OpenJPAExceptionTranslator;
@@ -33,8 +33,6 @@ import javax.inject.Inject;
 import javax.servlet.Filter;
 import javax.servlet.ServletException;
 import javax.validation.Validator;
-import java.util.Arrays;
-import java.util.List;
 
 
 /**
@@ -55,7 +53,6 @@ import java.util.List;
 @ComponentScan(basePackages = {"org.surfnet.oaaas.resource"})
 @ImportResource("classpath:spring-repositories.xml")
 @EnableTransactionManagement
-@EnableWebMvc
 public class SpringConfiguration {
 
   private static final String PERSISTENCE_UNIT_NAME = "oaaas";
@@ -115,6 +112,12 @@ public class SpringConfiguration {
     userConsentFilter.setUserConsentHandler(userConsentHandler());
     return userConsentFilter;
   }
+
+ @Bean
+ public Filter manageLoginFilter(){
+     final ManageLoginFilter mangeLoginFilter = new ManageLoginFilter();
+     return  mangeLoginFilter;
+ }
 
 
 

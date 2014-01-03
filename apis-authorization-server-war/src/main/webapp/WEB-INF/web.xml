@@ -79,6 +79,18 @@
     <url-pattern>/oauth2/consent</url-pattern>
   </filter-mapping>
 
+
+    <!--该filter负责后台管理的login-->
+  <filter>
+      <filter-name>manageLoginFilter</filter-name>
+      <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
+  </filter>
+
+    <filter-mapping>
+        <filter-name>manageLoginFilter</filter-name>
+        <url-pattern>/manage/*</url-pattern>
+    </filter-mapping>
+
   <servlet>
     <servlet-name>jersey</servlet-name>
     <servlet-class>
@@ -95,7 +107,26 @@
     <load-on-startup>1</load-on-startup>
   </servlet>
 
-  <servlet-mapping>
+    <servlet>
+        <servlet-name>mvc</servlet-name>
+        <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+        <init-param>
+            <param-name>contextClass</param-name>
+            <param-value>org.springframework.web.context.support.AnnotationConfigWebApplicationContext</param-value>
+        </init-param>
+        <init-param>
+            <param-name>contextConfigLocation</param-name>
+            <param-value>org.surfnet.oaaas.config.SpringMVCConfiguration</param-value>
+        </init-param>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>mvc</servlet-name>
+        <url-pattern>/manage/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
     <servlet-name>jersey</servlet-name>
     <url-pattern>/oauth2/*</url-pattern>
   </servlet-mapping>
