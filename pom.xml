@@ -109,6 +109,7 @@
     <mysql.version>5.1.20</mysql.version>
     <coin-api.version>3.6.1</coin-api.version>
      <guava.version>15.0</guava.version>
+      <sitemesh.version>2.4.2</sitemesh.version>
 
   </properties>
 
@@ -349,6 +350,12 @@
         <artifactId>logback-classic</artifactId>
         <version>${logback.version}</version>
       </dependency>
+        <dependency>
+            <groupId>opensymphony</groupId>
+            <artifactId>sitemesh</artifactId>
+            <version>${sitemesh.version}</version>
+            <scope>runtime</scope>
+        </dependency>
     </dependencies>
   </dependencyManagement>
   <build>

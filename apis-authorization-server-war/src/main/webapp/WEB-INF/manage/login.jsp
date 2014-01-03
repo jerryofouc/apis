@@ -14,7 +14,7 @@
     <!--[if lt IE 9]>
       <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
-    <script src="js/vendor/modernizr-2.6.2-rmodernizr-2.6.2-respond-1.1.0.min.jsespond-1.1.0.min.js"></script>
+    <script src="${ctx}/static/js/modernizr-2.6.2-rmodernizr-2.6.2-respond-1.1.0.min.jsespond-1.1.0.min.js"></script>
   </head>
   <body id="login">
     <div class="container">

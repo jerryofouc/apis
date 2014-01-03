@@ -137,8 +137,6 @@
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
     </dependency>
-
-
     <dependency>
       <groupId>org.apache.httpcomponents</groupId>
       <artifactId>httpclient</artifactId>
@@ -150,6 +148,11 @@
     <dependency>
       <groupId>nl.surfnet.apis</groupId>
       <artifactId>apis-surfconext-authn</artifactId>
+    </dependency>
+    <dependency>
+          <groupId>opensymphony</groupId>
+          <artifactId>sitemesh</artifactId>
+          <scope>runtime</scope>
     </dependency>
 
   </dependencies>

@@ -26,7 +26,7 @@ public class ManageLoginFilter implements Filter {
 
         final SystemAdminstrator loginUser = (SystemAdminstrator)((HttpServletRequest) request).getSession().getAttribute(ApisContants.LOGIN_USER);
         if(loginUser == null && !isLoginURL(request.getRequestURL().toString()) && !isLogoutURL(request.getRequestURL().toString())){ //如果没有登录就提示登录
-            request.getRequestDispatcher(ApisContants.LOGIN_URL).forward(request, response);
+            response.sendRedirect(ApisContants.LOGIN_URL);
         }else {
             chain.doFilter(request,response);
         }

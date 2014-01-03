@@ -1,6 +1,7 @@
 package org.surfnet.oaaas.config;
 
 import com.netease.backend.bigdata.apis.controller.LoginController;
+import com.netease.backend.bigdata.apis.controller.ResourceServerManageController;
 import com.netease.backend.bigdata.apis.filter.ManageLoginFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -37,6 +38,15 @@ public class SpringMVCConfiguration extends WebMvcConfigurerAdapter {
     @Bean
     public LoginController loginController(){
         return new LoginController(env);
+    }
+
+    /**
+     * 返回ResourceServer管理的controller
+     * @return
+     */
+    @Bean
+    public ResourceServerManageController resourceServerManageController(){
+        return new ResourceServerManageController();
     }
     @Override
     public void configureDefaultServletHandling(DefaultServletHandlerConfigurer configurer) {

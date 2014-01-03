@@ -26,7 +26,6 @@ import javax.servlet.http.HttpSession;
  * To change this template use File | Settings | File Templates.
  */
 @Controller
-@RequestMapping()
 public class LoginController {
 
     @Inject
@@ -48,7 +47,7 @@ public class LoginController {
             return "error/403";
         }
         session.setAttribute(ApisContants.LOGIN_USER,systemAdminstrator);//set session
-        return "redirect:/manage/index";
+        return "redirect:/manage/resourceServer";
     }
 
     @RequestMapping(value = "logout",method = RequestMethod.GET)

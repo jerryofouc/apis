@@ -79,6 +79,15 @@
     <url-pattern>/oauth2/consent</url-pattern>
   </filter-mapping>
 
+    <filter>
+        <filter-name>sitemeshFilter</filter-name>
+        <filter-class>com.opensymphony.sitemesh.webapp.SiteMeshFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>sitemeshFilter</filter-name>
+        <url-pattern>/manage/*</url-pattern>
+    </filter-mapping>
+
 
     <!--该filter负责后台管理的login-->
   <filter>
