@@ -25,11 +25,15 @@ public class ManageLoginFilter implements Filter {
         HttpServletResponse response = (HttpServletResponse) res;
 
         final SystemAdminstrator loginUser = (SystemAdminstrator)((HttpServletRequest) request).getSession().getAttribute(ApisContants.LOGIN_USER);
-        if(loginUser == null && !isLoginURL(request.getRequestURL().toString())){ //如果没有登录就提示登录
+        if(loginUser == null && !isLoginURL(request.getRequestURL().toString()) && !isLogoutURL(request.getRequestURL().toString())){ //如果没有登录就提示登录
             request.getRequestDispatcher(ApisContants.LOGIN_URL).forward(request, response);
         }else {
             chain.doFilter(request,response);
         }
+    }
+
+    private boolean isLogoutURL(String requestURL) {
+        return requestURL.contains(ApisContants.LOGOUT_URL);
     }
 
     private boolean isLoginURL(String requestURL) {

@@ -21,8 +21,8 @@
 
       <form class="form-signin" action="${ctx}/manage/login" method="post">
         <h2 class="form-signin-heading">请登录oauth2授权管理后台</h2>
-        <input type="text" class="input-block-level" placeholder="Email address">
-        <input type="password" class="input-block-level" placeholder="Password">
+        <input type="text" name="userName" class="input-block-level" placeholder="corp邮箱前缀">
+        <input type="password" name="password" class="input-block-level" placeholder="密码">
         <label class="checkbox">
           <input type="checkbox" value="remember-me"> Remember me
         </label>
