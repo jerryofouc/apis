@@ -80,7 +80,7 @@ public class ResourceServer extends AbstractEntity {
   @NotNull
   private String serverURL;
 
-  @Column(nullable = false, updatable = false)
+  @Column(nullable = false)
   @NotNull
   private String contactName;
   
