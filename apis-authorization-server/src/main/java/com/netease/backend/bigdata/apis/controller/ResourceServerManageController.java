@@ -39,11 +39,23 @@ public class ResourceServerManageController {
      * @param model
      * @return
      */
-    @RequestMapping(value = "",method = RequestMethod.GET)
+    @RequestMapping(value = "", method = RequestMethod.GET)
     public String getAllResourceServers(Model model){
         List<ResourceServer> resourceServerList = (List<ResourceServer>)resourceServerRepository.findAll();
         model.addAttribute("resourceServerList",resourceServerList);
         return "resourceserver/resourceserver-list";
+    }
+
+    @RequestMapping(value = "{id}",method = RequestMethod.GET)
+    public String toDetail(@PathVariable long id,RedirectAttributes redirectAttrs,Model model){
+        ResourceServer resourceServer = resourceServerRepository.findOne(id);
+        if(resourceServer == null){
+            redirectAttrs.addFlashAttribute(FAIL_MESSAGE,"该Resource Server不存在");
+            return "redirect:/manage/resourceServer";
+        }else{
+            model.addAttribute("resourceServer",resourceServer);
+            return "resourceserver/resourceserver-detail";
+        }
     }
 
     /**

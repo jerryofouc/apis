@@ -69,9 +69,9 @@
                             <td>${status.index}</td>
                             <td>${resourceServer.name}</td>
                             <td>${resourceServer.serverURL}</td>
-                            <td><fmt:formatDate value="${resourceServer.creationDate}" pattern="dd-MM-yyyy" /></td>
+                            <td><fmt:formatDate value="${resourceServer.creationDate}" pattern="dd-MM-yyyy HH:mm" /></td>
                             <td>${resourceServer.contactEmail}</td>
-                            <td>详情</td>
+                            <td><a href="${ctx}/manage/resourceServer/${resourceServer.id}">详情</a></td>
                             <td><button class="btn btn-primary btn-mini" onclick="location.href='${ctx}/manage/resourceServer/edit/${resourceServer.id}'" ><i class="icon-pencil icon-white"></i> 编辑</button>
                                 <button class="btn btn-danger btn-mini" onclick="location.href='${ctx}/manage/resourceServer/delete/${resourceServer.id}'"><i class="icon-remove icon-white"></i> 删除</button>
                             </td>
