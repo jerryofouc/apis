@@ -76,6 +76,10 @@ public class ResourceServer extends AbstractEntity {
   @NotNull
   private String secret;
 
+  @Column
+  @NotNull
+  private String serverURL;
+
   @Column(nullable = false, updatable = false)
   @NotNull
   private String contactName;
@@ -224,4 +228,17 @@ public class ResourceServer extends AbstractEntity {
     }
     return isValid;
   }
+
+    public static String getScopePattern() {
+        return SCOPE_PATTERN;
+    }
+
+    public String getServerURL() {
+        return serverURL;
+    }
+
+    public void setServerURL(String serverURL) {
+        this.serverURL = serverURL;
+    }
+
 }

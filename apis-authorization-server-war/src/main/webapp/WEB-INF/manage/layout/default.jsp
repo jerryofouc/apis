@@ -13,6 +13,7 @@
     <link href="${ctx}/static/css/bootstrap-responsive.min.css" rel="stylesheet" media="screen">
     <link href="${ctx}/static/js/jquery.easy-pie-chart.css" rel="stylesheet" media="screen">
     <link href="${ctx}/static/css/styles.css" rel="stylesheet" media="screen">
+
     <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
     <!--[if lt IE 9]>
     <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>

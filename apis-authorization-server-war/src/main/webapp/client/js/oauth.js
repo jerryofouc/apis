@@ -18,7 +18,7 @@
  * OAuth2 Implicit Grant client.
  *
  * Create with these options:
- * var auth = new OAuth({
+ * var authPlease = new OAuth({
  *   context: window,
  *   clientId: "myClientId",
  *   redirectUri: "http://myredirecturi", // (optional)

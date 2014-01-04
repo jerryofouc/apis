@@ -25,4 +25,11 @@
   <root level="info">
     <appender-ref ref="console"/>
   </root>
+    <logger name="org.springframework.http">
+        <level value="debug" />
+    </logger>
+    <!-- below alternate between debug and info -->
+    <logger name="org.springframework.web">
+        <level value="debug" />
+    </logger>
 </configuration>
