@@ -7,9 +7,9 @@
   <head>
     <title>用户登录</title>
     <!-- Bootstrap -->
-    <link href="${ctx}/static/css/bootstrap.min.css" rel="stylesheet" media="screen">
-    <link href="${ctx}/static/css/bootstrap-responsive.min.css" rel="stylesheet" media="screen">
-    <link href="${ctx}/static/css/styles.css" rel="stylesheet" media="screen">
+    <link href="${ctx}/static/lib/bootstrap.min.css" rel="stylesheet" media="screen">
+    <link href="${ctx}/static/lib/bootstrap-responsive.min.css" rel="stylesheet" media="screen">
+    <link href="${ctx}/static/lib/styles.css" rel="stylesheet" media="screen">
      <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
     <!--[if lt IE 9]>
       <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
@@ -30,7 +30,7 @@
       </form>
 
     </div> <!-- /container -->
-    <script src="${ctx}/static/js/jquery-1.9.1.min.js"></script>
+    <script src="${ctx}/static/lib/jquery-1.9.1.min.js"></script>
     <script src="${ctx}/static/bootstrap/js/bootstrap.min.js"></script>
   </body>
 </html>

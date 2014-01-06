@@ -7,15 +7,15 @@
     <head>
         <title>Admin Home Page</title>
         <!-- Bootstrap -->
-        <link href="${ctx}/static/css/bootstrap.min.css" rel="stylesheet" media="screen">
-        <link href="${ctx}/static/css/bootstrap-responsive.min.css" rel="stylesheet" media="screen">
-        <link href="${ctx}/static/js/jquery.easy-pie-chart.css" rel="stylesheet" media="screen">
-        <link href="${ctx}/static/css/styles.css" rel="stylesheet" media="screen">
+        <link href="${ctx}/static/lib/bootstrap.min.css" rel="stylesheet" media="screen">
+        <link href="${ctx}/static/lib/bootstrap-responsive.min.css" rel="stylesheet" media="screen">
+        <link href="${ctx}/static/lib/jquery.easy-pie-chart.css" rel="stylesheet" media="screen">
+        <link href="${ctx}/static/lib/styles.css" rel="stylesheet" media="screen">
         <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
         <!--[if lt IE 9]>
             <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
         <![endif]-->
-        <script src="${ctx}/static/js/modernizr-2.6.2-respond-1.1.0.min.js"></script>
+        <script src="${ctx}/static/lib/modernizr-2.6.2-respond-1.1.0.min.js"></script>
     </head>
     
     <body>
@@ -511,9 +511,9 @@
             </footer>
         </div>
         <!--/.fluid-container-->
-        <script src="${ctx}/static/js/jquery-1.9.1.min.js"></script>
-        <script src="${ctx}/static/js/bootstrap.min.js"></script>
-        <script src="${ctx}/static/js/jquery.easy-pie-chart.js"></script>
+        <script src="${ctx}/static/lib/jquery-1.9.1.min.js"></script>
+        <script src="${ctx}/static/lib/bootstrap.min.js"></script>
+        <script src="${ctx}/static/lib/jquery.easy-pie-chart.js"></script>
         <script src="${ctx}/static/js/scripts.js"></script>
         <script>
         $(function() {

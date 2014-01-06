@@ -75,5 +75,6 @@
     </div>
     <!-- /block -->
 </div>
+<script src="${ctx}/static/js/resourceserver.js"></script>
 </body>
 </html>

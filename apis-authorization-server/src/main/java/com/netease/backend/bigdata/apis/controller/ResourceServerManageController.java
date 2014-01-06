@@ -25,12 +25,7 @@ import java.util.List;
  */
 @Controller
 @RequestMapping(value = "resourceServer")
-public class ResourceServerManageController {
-    private static final String SUCCESS_MESSAGE = "successMessage";
-    private static final String FAIL_MESSAGE = "failMessage";
-    private static final String PAGE_TYPE = "PAGE_TYPE";
-    private static final String FORM_ACTION = "FORM_ACTION";
-
+public class ResourceServerManageController extends AbstractBaseController{
     @Inject
     private ResourceServerRepository resourceServerRepository;
 

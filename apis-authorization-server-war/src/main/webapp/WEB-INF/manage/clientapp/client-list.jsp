@@ -4,7 +4,7 @@
 <c:set var="ctx" value="${pageContext.request.contextPath}"/>
 <html>
 <head>
-    <title>Resource Server列表</title>
+    <title>Client APP列表</title>
 </head>
 
 <body>
@@ -15,7 +15,7 @@
                 <i class="icon-chevron-left hide-sidebar"><a href='#' title="Hide Sidebar" rel='tooltip'>&nbsp;</a></i>
                 <i class="icon-chevron-right show-sidebar" style="display:none;"><a href='#' title="Show Sidebar" rel='tooltip'>&nbsp;</a></i>
                 <li>
-                    <a href="#">Resource Server管理</a> <span class="divider">/</span>
+                    <a href="#">Client APP管理</a> <span class="divider">/</span>
                 </li>
                 <li class="active">列表</li>
             </ul>
@@ -46,8 +46,8 @@
     <!-- block -->
     <div class="block">
         <div class="navbar navbar-inner block-header">
-            <div class="muted pull-left">Resource Server列表</div>
-            <div class="muted pull-right"><a href="${ctx}/manage/resourceServer/create"><i class="icon-plus icon-blue   "></i>添加Resource Server</a></div>
+            <div class="muted pull-left">Client APP列表</div>
+            <div class="muted pull-right"><a href="${ctx}/manage/clientapp/create"><i class="icon-plus icon-blue"></i>添加Client APP</a></div>
         </div>
         <div class="block-content collapse in">
             <div class="span12">
@@ -56,24 +56,24 @@
                     <tr>
                         <th>编号</th>
                         <th>名称</th>
-                        <th>根域名</th>
+                        <th>clientID</th>
                         <th>创建时间</th>
-                        <th>联系人邮箱</th>
+                        <th>联系人</th>
                         <th>详细</th>
                         <th>操作</th>
                     </tr>
                     </thead>
                     <tbody>
-                    <c:forEach items="${resourceServerList}" var="resourceServer" varStatus="status">
+                    <c:forEach items="${clientList}" var="client" varStatus="status">
                         <tr>
                             <td>${status.index}</td>
-                            <td>${resourceServer.name}</td>
-                            <td>${resourceServer.serverURL}</td>
-                            <td><fmt:formatDate value="${resourceServer.creationDate}" pattern="dd-MM-yyyy HH:mm" /></td>
-                            <td>${resourceServer.contactEmail}</td>
-                            <td><a href="${ctx}/manage/resourceServer/${resourceServer.id}">详情</a></td>
-                            <td><button class="btn btn-primary btn-mini" onclick="location.href='${ctx}/manage/resourceServer/edit/${resourceServer.id}'" ><i class="icon-pencil icon-white"></i> 编辑</button>
-                                <button class="btn btn-danger btn-mini" onclick="location.href='${ctx}/manage/resourceServer/delete/${resourceServer.id}'"><i class="icon-remove icon-white"></i> 删除</button>
+                            <td>${client.name}</td>
+                            <td>${client.clientId}</td>
+                            <td><fmt:formatDate value="${client.creationDate}" pattern="dd-MM-yyyy HH:mm" /></td>
+                            <td>${client.contactName}</td>
+                            <td><a href="${ctx}/manage/clientapp/${client.id}">详情</a></td>
+                            <td><button class="btn btn-primary btn-mini" onclick="location.href='${ctx}/manage/clientapp/edit/${client.id}'" ><i class="icon-pencil icon-white"></i> 编辑</button>
+                                <button class="btn btn-danger btn-mini" onclick="location.href='${ctx}/manage/clientapp/delete/${client.id}'"><i class="icon-remove icon-white"></i> 删除</button>
                             </td>
                         </tr>
                     </c:forEach>
@@ -84,6 +84,6 @@
     </div>
     <!-- /block -->
 </div>
-<script src="${ctx}/static/js/resourceserver.js"></script>
+<script src="${ctx}/static/js/clientapp.js"></script>
 </body>
 </html>

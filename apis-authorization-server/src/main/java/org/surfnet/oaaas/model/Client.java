@@ -72,7 +72,7 @@ public class Client extends AbstractEntity {
 
   @ManyToOne(optional = false)
   @JsonIgnore
-  @JoinColumn(name = "resourceserver_id", nullable = false, updatable = false)
+  @JoinColumn(name = "resourceserver_id", nullable = false)
   private ResourceServer resourceServer;
 
   @ElementCollection(fetch= FetchType.EAGER)
@@ -108,7 +108,18 @@ public class Client extends AbstractEntity {
   @Column
   private boolean allowedClientCredentials;
 
-  // Listed here so Cascade will work.
+  @Transient
+  private Long resourceServerId;
+
+  public Long getResourceServerId() {
+    return resourceServerId;
+  }
+
+  public void setResourceServerId(Long resourceServerId) {
+    this.resourceServerId = resourceServerId;
+  }
+
+    // Listed here so Cascade will work.
   @OneToMany(mappedBy ="client", cascade = CascadeType.ALL)
   private List<AccessToken> accessTokens;
 
