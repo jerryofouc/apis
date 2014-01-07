@@ -68,8 +68,8 @@ public class ResourceServer extends AbstractEntity {
   private String description;
 
 
-  @ElementCollection(fetch= FetchType.EAGER)
-  @NotNull
+//  @ElementCollection(fetch= FetchType.EAGER)
+//  @NotNull
   private List<String> scopes = new ArrayList<String>();
 
   @Column
@@ -97,6 +97,13 @@ public class ResourceServer extends AbstractEntity {
   @JoinColumn(name = "resourceserver_id", nullable = false)
   @Valid
   private Set<Client> clients;
+
+  @JsonIgnore
+  @OneToMany(fetch = FetchType.EAGER, cascade = {CascadeType.ALL}, orphanRemoval = true)
+  @JoinColumn(name = "resourceserver_id", nullable = false)
+  @Valid
+  private Set<ResourceServerScope> resourceServerScopes;
+
 
   @Column
   private String thumbNailUrl;
@@ -241,4 +248,11 @@ public class ResourceServer extends AbstractEntity {
         this.serverURL = serverURL;
     }
 
+    public Set<ResourceServerScope> getResourceServerScopes() {
+        return resourceServerScopes;
+    }
+
+    public void setResourceServerScopes(Set<ResourceServerScope> resourceServerScopes) {
+        this.resourceServerScopes = resourceServerScopes;
+    }
 }

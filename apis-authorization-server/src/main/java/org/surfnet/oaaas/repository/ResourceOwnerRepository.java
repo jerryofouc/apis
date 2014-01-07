@@ -22,4 +22,6 @@ public interface ResourceOwnerRepository extends CrudRepository<ResourceOwner, L
 
     @Query("select  rta.accessRestApi from   ResourceOwnerToAccessRestApi rta join FETCH rta.accessRestApi   where rta.resourceOwner.id=?1")
     List<AccessRestApi> findAccessApisById(long resourceOwnerId);
+
+    ResourceOwner findByEmail(String email);
 }

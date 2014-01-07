@@ -2,6 +2,7 @@ package org.surfnet.oaaas.config;
 
 import com.netease.backend.bigdata.apis.controller.ClientAppController;
 import com.netease.backend.bigdata.apis.controller.LoginController;
+import com.netease.backend.bigdata.apis.controller.ResourceOwnerController;
 import com.netease.backend.bigdata.apis.controller.ResourceServerManageController;
 import com.netease.backend.bigdata.apis.filter.ManageLoginFilter;
 import org.springframework.context.annotation.Bean;
@@ -44,6 +45,11 @@ public class SpringMVCConfiguration extends WebMvcConfigurerAdapter {
     @Bean
     public ClientAppController clientAppController(){
         return new ClientAppController();
+    }
+
+    @Bean
+    public ResourceOwnerController resourceOwnerController(){
+        return new ResourceOwnerController();
     }
 
     /**

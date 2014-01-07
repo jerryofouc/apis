@@ -10,7 +10,7 @@
             <a href="${ctx}/manage/clientapp" ><i class="icon-chevron-right"></i>Client Application管理</a>
         </li>
         <li id="li-resourceowner">
-            <a href="${ctx}/manage/resourceServer"><i class="icon-chevron-right"></i>Resource Owner管理</a>
+            <a href="${ctx}/manage/resourceOwner"><i class="icon-chevron-right"></i>Resource Owner管理</a>
         </li>
         <li id="li-openapi">
             <a href="${ctx}/manage/resourceServer"><i class="icon-chevron-right"></i>OpenApi 管理</a>

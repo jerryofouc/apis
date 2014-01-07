@@ -1,6 +1,8 @@
 package com.netease.backend.bigdata.apis.controller;
 
+import com.google.common.collect.Lists;
 import com.netease.backend.bigdata.apis.utils.ApisUtils;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -8,8 +10,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.surfnet.oaaas.model.ResourceServer;
+import org.surfnet.oaaas.model.ResourceServerScope;
 import org.surfnet.oaaas.repository.ResourceOwnerRepository;
 import org.surfnet.oaaas.repository.ResourceServerRepository;
+import org.surfnet.oaaas.repository.ResourceServerScopeRepository;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
@@ -26,8 +30,11 @@ import java.util.List;
 @Controller
 @RequestMapping(value = "resourceServer")
 public class ResourceServerManageController extends AbstractBaseController{
+
     @Inject
     private ResourceServerRepository resourceServerRepository;
+    @Inject
+    private ResourceServerScopeRepository resourceServerScopeRepository;
 
     /**
      * Resource Server列表页面
@@ -77,13 +84,42 @@ public class ResourceServerManageController extends AbstractBaseController{
             return "redirect:/manage/resourceServer";
         }
     }
+
     @RequestMapping(value = "edit/{id}",method = RequestMethod.POST)
     public String edit(@PathVariable(value = "id") Long id,ResourceServer resourceServer,RedirectAttributes redirectAttrs){
         ResourceServer loadResourceServer = resourceServerRepository.findOne(id);
         setloadResourceServer(loadResourceServer,resourceServer);
         loadResourceServer = resourceServerRepository.save(loadResourceServer);
+        List<ResourceServerScope> oldserverScopes = Lists.newArrayList(loadResourceServer.getResourceServerScopes());
+        saveEditResourceServerScope(loadResourceServer,oldserverScopes,resourceServer.getScopes());
         redirectAttrs.addFlashAttribute(SUCCESS_MESSAGE,"保存成功");
         return "redirect:/manage/resourceServer";
+    }
+
+    private void saveEditResourceServerScope(ResourceServer resourceServer ,List<ResourceServerScope> oldserverScopes, List<String> scopes) {
+        //删除
+        for(ResourceServerScope s : oldserverScopes){//删除
+            if(!scopes.contains(s.getName())){
+                resourceServerScopeRepository.delete(s.getId());
+            }
+        }
+
+        //增加
+        for(String s : scopes){
+            boolean isContains = false;
+            for(ResourceServerScope rs : oldserverScopes){
+                if(rs.getName().equals(s)){
+                    isContains = true;
+                    break;
+                }
+            }
+            if(!isContains){
+                ResourceServerScope temp = new ResourceServerScope();
+                temp.setName(s);
+                temp.setResourceServer(resourceServer);
+                resourceServerScopeRepository.save(temp);
+            }
+        }
     }
 
     /**
@@ -107,9 +143,19 @@ public class ResourceServerManageController extends AbstractBaseController{
     public String createResourceServer(ResourceServer resourceServer,RedirectAttributes redirectAttrs){
         resourceServer.setSecret(ApisUtils.generateRandomId());
         resourceServer.setKey(ApisUtils.generateRandomId());
-        resourceServerRepository.save(resourceServer);
+        ResourceServer saveResourceServer = resourceServerRepository.save(resourceServer);
+        saveResourceServerScopers(saveResourceServer,resourceServer.getScopes());
         redirectAttrs.addFlashAttribute(SUCCESS_MESSAGE,"保存成功");
         return "redirect:/manage/resourceServer";
+    }
+
+    private void saveResourceServerScopers(ResourceServer saveResourceServer, List<String> scopes) {
+        for(String scope : scopes){
+            ResourceServerScope resourceServerScope = new ResourceServerScope();
+            resourceServerScope.setName(scope);
+            resourceServerScope.setResourceServer(saveResourceServer);
+            resourceServerScopeRepository.save(resourceServerScope);
+        }
     }
 
     /**

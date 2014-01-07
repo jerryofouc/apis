@@ -12,6 +12,7 @@ public abstract class ApisContants {
     public static final String MANAMENT_PREFIX = "/manage";
     public static final String LOGIN_URL = MANAMENT_PREFIX + "/login";
     public static final String LOGOUT_URL =  MANAMENT_PREFIX + "/logout";
+    public static final String CORP_EMAIL = "@corp.netease.com";
 
     private ApisContants(){}
 }

@@ -7,7 +7,7 @@
     <link href="${ctx}/static/lib/bootstrap-select.css" rel="stylesheet" media="screen">
     <script src="${ctx}/static/lib/bootstrap-select.js"></script>
     <link href="${ctx}/static/lib/bootstrap-checkbox.css" rel="stylesheet" media="screen">
-    <link href="${ctx}/static/css/clientapp.css" rel="stylesheet" >
+    <link href="${ctx}/static/css/main.css" rel="stylesheet" >
     <script src="${ctx}/static/lib/bootstrap-checkbox.js"></script>
     <script src="${ctx}/static/lib/jquery.validate.js"></script>
 </head>
@@ -76,7 +76,7 @@
                                     </c:if>
                                     </div>
                                 </c:forEach>
-                            <c:if test="${client == null ||     client.redirectUris.size() == 0}">
+                            <c:if test="${client == null || client.redirectUris.size() == 0}">
                                 <div class="controls" style="margin-top:10px" >
                                     <input class="input-xlarge focused" name="redirectUris"  value="" placeholder="http://johndoe.com"    type="text" >
                                     <button class="btn btn-primary btn-mini btn-add " onclick="addRedirectInput()"><i class="icon-plus-sign icon-white"></i>添加</button>
