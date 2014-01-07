@@ -1,49 +1,7 @@
 $(document).ready(function(){
     $('#li-clientapp').addClass("active");
-    $("#client-form").validate({
-        rules:{
-            name:"required",
-            clientId:{
-                required:true,
-                remote:{
-                    url: "isUnique",
-                    type: "get",
-                    data: {
-                        username: function() {
-                            return $('#clientId-input').val();
-                        }
-                    }
-                }
-            },
-            redirectUris:"required",
-            contactName:"required",
-            contactEmail:"required email",
-            thumbNailUrl :"required url",
-            expireDuration: "required digits"
-        },
-        messages:{
-            name:"名字不能为空",
-            clientId:{
-                required:"不为空",
-                remote:"不重复"
-            },
-            redirectUris : {
-                required:'不为空',
-                url: '且必须使用正确的网址'
-            },
-            contactName:"不为空",
-            contactEmail:{
-                required:'不为空',
-                email: '且必须使用正确的email'
-            },
-            thumbNailUrl: "不为空，且必须使用正确的网址",
-            expireDuration:{
-                required:'不为空',
-                digits: '必须使用整数'
-            }
-        }
+    validateForm();
 
-    });
  });
 
 //动态增加RedirectInput
@@ -57,20 +15,59 @@ function addRedirectInput(){
     var deleteButton = '<button class="btn btn-primary btn-mini btn-delete" onclick="$(this).parent().remove()"><i class="icon-trash icon-white"></i>删除</button>';
     $('.btn-add').replaceWith(deleteButton);
     $('#redirectInputs').append(redirectInput);
+    validateForm();//重新绑定一遍事件
 }
-function checkClientId(){
-    var clientId = $('#clientId-input').val();
-    if(clientId){
-        $.getJSON( "isUnique?"+"clientId="+ clientId , function( data ) {
-            if(data){
-                $('#clientId-tip').text('OK').css('color','green').show().delay(1000).fadeOut();
-            }else{
-                $('#clientId-tip').text('重复id').css('color','red').show().delay(1000).fadeOut();
+function validateForm(){
+    $("#client-form").validate({
+        rules:{
+            name:"required",
+            clientId:{
+                required:true,
+                remote:{
+                    url: config.uniqueURL,
+                    type: "get",
+                    data: {
+                        clientId: function() {
+                            return $('#clientId-input').val();
+                        },
+                        id:function(){
+                            return  $('#input-id').val();
+                        }
+                    }
+                }
+            },
+            redirectUris:{
+                required:true,
+                url:true
+            },
+            contactName:"required",
+            contactEmail:"required email",
+            thumbNailUrl :"url",
+            expireDuration: "required digits"
+        },
+        messages:{
+            name:"名字不能为空",
+            clientId:{
+                required:"不为空",
+                remote:"不重复"
+            },
+            redirectUris : {
+                required:'不为空',
+                url: '请使用正确格式的url'
+            },
+            contactName:"不为空",
+            contactEmail:{
+                required:'不为空',
+                email: '且必须使用正确的email'
+            },
+            thumbNailUrl: "必须使用正确的网址",
+            expireDuration:{
+                required:'不为空',
+                digits: '必须使用整数'
             }
-        });
-    }else{
-        $('#clientId-tip').text('不能为空').css('color','red').show().delay(1000).fadeOut();
-    }
+        }
+    });
 }
+
 
 

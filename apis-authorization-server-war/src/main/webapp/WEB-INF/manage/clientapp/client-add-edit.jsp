@@ -37,7 +37,7 @@
         <div class="block-content collapse in">
             <div class="span12">
                 <form class="form-horizontal" action="${ctx}/manage/clientapp/${FORM_ACTION}" id="client-form" method="post">
-                    <input type="hidden" name="id" value="${client.id}">
+                    <input type="hidden" id="input-id" name="id" value="${client.id}">
                     <fieldset>
                         <div class="control-group">
                             <label class="control-label">名称</label>
@@ -50,7 +50,6 @@
                             <label class="control-label">clientId</label>
                             <div class="controls">
                                 <input class="input-xlarge focused" id="clientId-input" name="clientId" placeholder="clientId" value="${client.clientId}"   type="text"><span id="clientId-tip" style="display: none">ddd</span>
-                                <button class="btn btn-primary btn-mini" type="button" onclick="checkClientId()">check unique</button>
                                 <span class="help-inline">是您获得授权唯一的id，必须唯一</span>
                             </div>
                         </div>
@@ -148,6 +147,11 @@
     </div>
     <!-- /block -->
 </div>
+<script >
+    var config = {
+        uniqueURL : '${ctx}/manage/clientapp/isUnique'
+    }
+</script>
 <script src="${ctx}/static/js/clientapp.js"></script>
 </body>
 </html>

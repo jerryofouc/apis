@@ -59,10 +59,10 @@ public class ClientAppController extends AbstractBaseController{
      */
     @RequestMapping(value = "isUnique",method = RequestMethod.GET)
     public @ResponseBody
-    String isisUnique(@RequestParam(value = "clientId",required = true) String clientId){
+    String isisUnique(@RequestParam(value = "clientId",required = true) String clientId,@RequestParam(value = "id",required = false) Long id){
         Client client = clientRepository.findByClientId(clientId);
         Gson gson = new Gson();
-        if(client != null){
+        if(client != null && !client.getId().equals(id)){
             return gson.toJson(Boolean.FALSE);
         }
         return gson.toJson(Boolean.TRUE);
