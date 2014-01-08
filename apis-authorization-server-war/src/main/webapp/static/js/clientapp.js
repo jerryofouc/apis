@@ -1,10 +1,28 @@
 $(document).ready(function(){
     $('#li-clientapp').addClass("active");
     validateForm();
-
+    initScopeSelect(preloadData);
+    $('#resourceServerId').change(function(){
+        initScopeSelect(null);
+    });
  });
 
-//动态增加RedirectInput
+function initScopeSelect(preloadData){
+    var id = $('#resourceServerId :selected').val();
+    $.getJSON( config.scopeURL + id, function( data ) {
+        var html = '<select id="scope-select" style="width:300px" name="scopes" class="populate scope-select" multiple>';
+        $.each(data,function(key,value){
+            html += '<option value="'+key+'">'+value+'</option>'
+        })
+        html += '</select>';
+        $('#scope-div').children().remove();
+        $('#scope-div').append(html);
+        $('#scope-select').select2();
+        $('#scope-select').select2('data',preloadData);
+    });
+}
+
+//增加RedirectInput
 function addRedirectInput(){
     var redirectInput = '<div class="controls" style="margin-top:10px"> \
                          <input class="input-xlarge focused"  name="redirectUris" value="" placeholder="http://johndoe.com" required pattern="(http|https)://.+"  type="text" > \

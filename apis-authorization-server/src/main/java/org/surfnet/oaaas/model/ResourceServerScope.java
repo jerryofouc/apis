@@ -30,6 +30,8 @@ public class ResourceServerScope extends AbstractEntity{
     @XmlTransient
     private ResourceServer resourceServer;
 
+
+
     public String getName() {
         return name;
     }
@@ -45,4 +47,5 @@ public class ResourceServerScope extends AbstractEntity{
     public void setResourceServer(ResourceServer resourceServer) {
         this.resourceServer = resourceServer;
     }
+
 }

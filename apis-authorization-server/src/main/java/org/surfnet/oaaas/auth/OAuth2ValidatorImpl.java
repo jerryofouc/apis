@@ -82,12 +82,12 @@ public class OAuth2ValidatorImpl implements OAuth2Validator {
       return null;
     } else {
       List<String> scopes = authorizationRequest.getRequestedScopes();
-      List<String> clientScopes = client.getScopes();
-      for (String scope : scopes) {
-        if (!clientScopes.contains(scope)) {
-          throw new ValidationResponseException(SCOPE_NOT_VALID);
-        }
-      }
+   //   List<String> clientScopes = client.getScopes();
+//      for (String scope : scopes) {
+//        if (!clientScopes.contains(scope)) {
+//          throw new ValidationResponseException(SCOPE_NOT_VALID);
+//        }
+//      }
       return authorizationRequest.getRequestedScopes();
     }
   }

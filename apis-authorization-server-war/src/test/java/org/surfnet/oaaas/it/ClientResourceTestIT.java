@@ -133,7 +133,7 @@ public class ClientResourceTestIT extends AbstractAuthorizationServerTest {
   @Test
   public void putInvalidScopes() {
     Client c = buildClient();
-    c.setScopes(Arrays.asList("invalidScope", "read", "write"));
+ //   c.setScopes(Arrays.asList("invalidScope", "read", "write"));
     ClientResponse clientResponse = webResource
         .header("Authorization", authorizationBearer(ACCESS_TOKEN))
         .put(ClientResponse.class, c);
@@ -182,7 +182,7 @@ public class ClientResourceTestIT extends AbstractAuthorizationServerTest {
     c.setContactEmail("contact@example.com");
     c.setContactName("contact name");
     c.setName(r);
-    c.setScopes(Arrays.asList("read"));
+ //   c.setScopes(Arrays.asList("read"));
     c.setSecret(r);
     c.setDescription("Some description");
     final HashMap<String, String> attributes = new HashMap<String, String>();

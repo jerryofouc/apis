@@ -187,7 +187,7 @@ public class OAuth2ValidatorImplTest {
     client.setName("Client App");
     client.setClientId(clientId);
     client.setRedirectUris(Arrays.asList("http://gothere.nl", "http://gohere.nl"));
-    client.setScopes(Arrays.asList("read","update"));
+ //   client.setScopes(Arrays.asList("read","update"));
     return client;
   }
 

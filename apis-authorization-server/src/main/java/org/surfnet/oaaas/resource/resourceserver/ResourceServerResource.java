@@ -239,15 +239,15 @@ public class ResourceServerResource extends AbstractResource {
       Collection<String> outdatedScopes = subtract(oldScopes, newScopes);
       LOG.info("Resource server has updated scopes. Will remove all outdated scopes from clients: {}", outdatedScopes);
 
-      for (Client c : clients) {
-        final List<String> clientScopes = c.getScopes();
-        if (CollectionUtils.containsAny(clientScopes, outdatedScopes)) {
-          ArrayList<String> prunedScopes = new ArrayList<String>(subtract(clientScopes, outdatedScopes));
-          LOG.info("Client scopes of client {} were: {}. After pruning (because resourceServer has new scopes): {}",
-                  new Object[]{c.getClientId(), c.getScopes(), prunedScopes});
-          c.setScopes(prunedScopes);
-        }
-      }
+//      for (Client c : clients) {
+//        final List<String> clientScopes = c.getScopes();
+//        if (CollectionUtils.containsAny(clientScopes, outdatedScopes)) {
+//          ArrayList<String> prunedScopes = new ArrayList<String>(subtract(clientScopes, outdatedScopes));
+//          LOG.info("Client scopes of client {} were: {}. After pruning (because resourceServer has new scopes): {}",
+//                  new Object[]{c.getClientId(), c.getScopes(), prunedScopes});
+//          c.setScopes(prunedScopes);
+//        }
+//      }
     }
   }
 

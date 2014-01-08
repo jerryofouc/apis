@@ -232,7 +232,7 @@ public class TokenResource {
         request.setPrincipal(new AuthenticatedPrincipal(request.getClient().getClientId()));
         // Apply all client scopes to the access token.
         // TODO: take into account given scopes from the request
-        request.setGrantedScopes(request.getClient().getScopes());
+       // request.setGrantedScopes(request.getClient().getScopes());
       }
       else {
         return sendErrorResponse(ValidationResponse.UNSUPPORTED_GRANT_TYPE);

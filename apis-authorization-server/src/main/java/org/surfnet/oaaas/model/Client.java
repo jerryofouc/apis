@@ -18,13 +18,11 @@ package org.surfnet.oaaas.model;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import javax.persistence.*;
 import javax.validation.ConstraintValidatorContext;
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -58,6 +56,10 @@ public class Client extends AbstractEntity {
   @Column
   private String secret;
 
+  @Transient
+  private String scopes;
+
+
   @Column
   private String description;
 
@@ -67,8 +69,8 @@ public class Client extends AbstractEntity {
   @Column
   private String contactEmail;
 
-  @ElementCollection(fetch= FetchType.EAGER)
-  private List<String> scopes;
+//  @ElementCollection(fetch= FetchType.EAGER)
+//  private List<String> scopes;
 
   @ManyToOne(optional = false)
   @JsonIgnore
@@ -127,6 +129,11 @@ public class Client extends AbstractEntity {
   @OneToMany(mappedBy ="client", cascade = CascadeType.ALL)
   private List<AuthorizationRequest> authorizationRequests;
 
+  @JsonIgnore
+  @OneToMany(fetch = FetchType.EAGER, cascade = {CascadeType.ALL}, orphanRemoval = true)
+  @JoinColumn(name = "client_id", nullable = false)
+   @Valid
+  private Set<ClientToScope> clientToScopes;
 
   public String getName() {
     return name;
@@ -160,20 +167,20 @@ public class Client extends AbstractEntity {
     this.contactEmail = contactEmail;
   }
 
-  /**
-   * @return the scopes
-   */
-  public List<String> getScopes() {
-    return scopes;
-  }
-
-  /**
-   * @param scopes
-   *          the scopes to set
-   */
-  public void setScopes(List<String> scopes) {
-    this.scopes = scopes;
-  }
+//  /**
+//   * @return the scopes
+//   */
+//  public List<String> getScopes() {
+//    return scopes;
+//  }
+//
+//  /**
+//   * @param scopes
+//   *          the scopes to set
+//   */
+//  public void setScopes(List<String> scopes) {
+//    this.scopes = scopes;
+//  }
 
   /**
    * @return the resourceServer
@@ -325,7 +332,7 @@ public class Client extends AbstractEntity {
   }
 
   /**
-   * @param AllowedImplicitGrant
+   *
    *          the AllowedImplicitGrant to set
    */
   public void setAllowedImplicitGrant(boolean allowedImplicitGrant) {
@@ -348,12 +355,35 @@ public class Client extends AbstractEntity {
     this.allowedClientCredentials = allowedClientCredentials;
   }
 
+    public List<AccessToken> getAccessTokens() {
+        return accessTokens;
+    }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see org.surfnet.oaaas.model.AbstractEntity#validate()
-   */
+    public void setAccessTokens(List<AccessToken> accessTokens) {
+        this.accessTokens = accessTokens;
+    }
+
+    public List<AuthorizationRequest> getAuthorizationRequests() {
+        return authorizationRequests;
+    }
+
+    public void setAuthorizationRequests(List<AuthorizationRequest> authorizationRequests) {
+        this.authorizationRequests = authorizationRequests;
+    }
+
+    public Set<ClientToScope> getClientToScopes() {
+        return clientToScopes;
+    }
+
+    public void setClientToScopes(Set<ClientToScope> clientToScopes) {
+        this.clientToScopes = clientToScopes;
+    }
+
+    /*
+               * (non-Javadoc)
+               *
+               * @see org.surfnet.oaaas.model.AbstractEntity#validate()
+               */
   @Override
   public boolean validate(ConstraintValidatorContext context) {
     boolean isValid = true;
@@ -368,12 +398,12 @@ public class Client extends AbstractEntity {
       isValid = false;
     }
 
-    if (scopes != null && !resourceServer.getScopes().containsAll(scopes)) {
-      String message = "Client should only contain scopes that its resource server defines. " +
-          "Client scopes: " + scopes + ". Resource server scopes: " + resourceServer.getScopes();
-      violation(context, message);
-      isValid = false;
-    }
+//    if (scopes != null && !resourceServer.getScopes().containsAll(scopes)) {
+//      String message = "Client should only contain scopes that its resource server defines. " +
+//          "Client scopes: " + scopes + ". Resource server scopes: " + resourceServer.getScopes();
+//      violation(context, message);
+//      isValid = false;
+//    }
 
     for (String redirectUri : redirectUris) {
       try {
@@ -386,4 +416,11 @@ public class Client extends AbstractEntity {
     return isValid;
   }
 
+    public String getScopes() {
+        return scopes;
+    }
+
+    public void setScopes(String scopes) {
+        this.scopes = scopes;
+    }
 }

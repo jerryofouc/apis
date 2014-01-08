@@ -49,7 +49,7 @@ public class ClientTest extends AbstractEntityTest {
 
     ResourceServer resourceServer = new ResourceServer();
     resourceServer.setScopes(Arrays.asList("read", "delete"));
-    client.setScopes(Arrays.asList("read", "delete"));
+ //   client.setScopes(Arrays.asList("read", "delete"));
     client.setResourceServer(resourceServer);
 
   }
@@ -64,7 +64,7 @@ public class ClientTest extends AbstractEntityTest {
   @Test
   public void arbitraryScopes() {
 
-    client.setScopes(Arrays.asList("arbitrary", "scopes"));
+  //  client.setScopes(Arrays.asList("arbitrary", "scopes"));
     Set<ConstraintViolation<Client>> violations = validator.validate(client);
     assertEquals("Client should only be able to use scopes that the resource server defines", 1, violations.size());
   }

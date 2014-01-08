@@ -106,7 +106,7 @@ public class ClientResourceTest {
     Client client = new Client();
     request.setAttribute(AuthorizationServerFilter.VERIFY_TOKEN_RESPONSE, new VerifyTokenResponse("",
         new ArrayList<String>(), new AuthenticatedPrincipal("user"), 0L));
-    client.setScopes(Arrays.asList("Some", "arbitrary", "set"));
+ //   client.setScopes(Arrays.asList("Some", "arbitrary", "set"));
     client.setName("clientname");
     ResourceServer resourceServer = new ResourceServer();
     resourceServer.setScopes(Arrays.asList("read", "update", "delete"));

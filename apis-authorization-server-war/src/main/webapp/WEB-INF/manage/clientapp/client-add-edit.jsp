@@ -10,6 +10,9 @@
     <link href="${ctx}/static/css/main.css" rel="stylesheet" >
     <script src="${ctx}/static/lib/bootstrap-checkbox.js"></script>
     <script src="${ctx}/static/lib/jquery.validate.js"></script>
+    <link href="${ctx}/static/lib/select2-3.4.5/select2.css" rel="stylesheet"/>
+    <script src="${ctx}/static/lib/select2-3.4.5/select2.js"></script>
+
 </head>
 
 <body>
@@ -56,13 +59,21 @@
                         <div class="control-group">
                             <label class="control-label">Resource Server</label>
                             <div class="controls">
-                                <select class="selectpicker span4" name="resourceServerId">
+                                <select class="selectpicker span4" id="resourceServerId" name="resourceServerId">
                                     <c:forEach var="rs" items="${resourceServers}">
                                         <option value="${rs.id}" <c:if test="${rs.id == client.resourceServer.id}">selected="true"</c:if>>${rs.name}</option>
                                     </c:forEach>
                                  </select>
                             </div>
                         </div>
+                        <div class="control-group">
+                            <label class="control-label">Scopes</label>
+                            <div class="controls" id="scope-div">
+                                <select id="scope" style="width:300px" class="populate scope-select" multiple>
+                                </select>
+                            </div>
+                        </div>
+
                         <div class="control-group" id="redirectInputs" >
                             <label class="control-label" style="margin-top:10px" >redirect URIs</label>
                                 <c:forEach var="red" items="${client.redirectUris}" varStatus="status">
@@ -83,6 +94,7 @@
                                 </div>
                             </c:if>
                         </div>
+
                         <div class="control-group">
                             <label class="control-label">联系人姓名</label>
                             <div class="controls">
@@ -141,7 +153,6 @@
                         </div>
                     </fieldset>
                 </form>
-
             </div>
         </div>
     </div>
@@ -149,8 +160,15 @@
 </div>
 <script >
     var config = {
-        uniqueURL : '${ctx}/manage/clientapp/isUnique'
+        uniqueURL : '${ctx}/manage/clientapp/isUnique',
+            scopeURL: '${ctx}/manage/clientapp/getScopes?resourceServerId='
     }
+
+    var preloadData = [
+        <c:forEach var="cs" items="${client.clientToScopes}" varStatus="status">
+        { id: '${cs.resourceServerScope.id}', text: '${cs.resourceServerScope.name}'}<c:if test="${!status.last}">,</c:if>
+        </c:forEach>
+    ];
 </script>
 <script src="${ctx}/static/js/clientapp.js"></script>
 </body>
