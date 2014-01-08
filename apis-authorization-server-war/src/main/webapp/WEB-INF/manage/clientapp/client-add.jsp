@@ -12,7 +12,6 @@
     <script src="${ctx}/static/lib/jquery.validate.js"></script>
     <link href="${ctx}/static/lib/select2-3.4.5/select2.css" rel="stylesheet"/>
     <script src="${ctx}/static/lib/select2-3.4.5/select2.js"></script>
-
 </head>
 
 <body>

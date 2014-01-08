@@ -4,7 +4,7 @@
 <c:set var="ctx" value="${pageContext.request.contextPath}"/>
 <html>
 <head>
-    <title>Resource Owner列表</title>
+    <title>Open API列表</title>
 </head>
 
 <body>
@@ -15,7 +15,7 @@
                 <i class="icon-chevron-left hide-sidebar"><a href='#' title="Hide Sidebar" rel='tooltip'>&nbsp;</a></i>
                 <i class="icon-chevron-right show-sidebar" style="display:none;"><a href='#' title="Show Sidebar" rel='tooltip'>&nbsp;</a></i>
                 <li>
-                    <a href="#">Resource Owner管理</a> <span class="divider">/</span>
+                    <a href="#">Open API管理</a> <span class="divider">/</span>
                 </li>
                 <li class="active">列表</li>
             </ul>
@@ -46,8 +46,8 @@
     <!-- block -->
     <div class="block">
         <div class="navbar navbar-inner block-header">
-            <div class="muted pull-left">Resource Owner列表</div>
-            <div class="muted pull-right"><a href="${ctx}/manage/resourceOwner/create"><i class="icon-plus icon-blue   "></i>添加Resource Owner</a></div>
+            <div class="muted pull-left">Open API列表</div>
+            <div class="muted pull-right"><a href="${ctx}/manage/api/create"><i class="icon-plus icon-blue   "></i>添加Open API</a></div>
         </div>
         <div class="block-content collapse in">
             <div class="span12">
@@ -55,21 +55,23 @@
                     <thead>
                     <tr>
                         <th>编号</th>
-                        <th>用户名</th>
-                        <th>邮箱</th>
-                        <th>创建时间</th>
+                        <th>Resource Owner</th>
+                        <th>Resource Server</th>
+                        <th>scope</th>
+                        <th>URL</th>
                         <th>操作</th>
                     </tr>
                     </thead>
                     <tbody>
-                    <c:forEach items="${resourceOwnerList}" var="resourceOwner" varStatus="status">
+                    <c:forEach items="${accessRestApiList}" var="api" varStatus="status">
                         <tr>
                             <td>${status.index}</td>
-                            <td>${resourceOwner.name}</td>
-                            <td>${resourceOwner.email}</td>
-                            <td><fmt:formatDate value="${resourceOwner.creationDate}" pattern="dd-MM-yyyy HH:mm" /></td>
-                            <td><button class="btn btn-primary btn-mini" onclick="location.href='${ctx}/manage/resourceOwner/edit/${resourceOwner.id}'" ><i class="icon-pencil icon-white"></i> 编辑</button>
-                                <button class="btn btn-danger btn-mini" onclick="location.href='${ctx}/manage/resourceOwner/delete/${resourceOwner.id}'"><i class="icon-remove icon-white"></i> 删除</button>
+                            <td>${api.resourceOwner.name}</td>
+                            <td>${api.resourceServer.name}</td>
+                            <td>${api.resourceOwnerToScope.resourceServerScope.name}</td>
+                            <td>${api.completeUrl}</td>
+                            <td>
+                                <button class="btn btn-danger btn-mini" onclick="location.href='${ctx}/manage/api/delete/${api.id}'"><i class="icon-remove icon-white"></i> 删除</button>
                             </td>
                         </tr>
                     </c:forEach>
@@ -80,6 +82,6 @@
     </div>
     <!-- /block -->
 </div>
-<script src="${ctx}/static/js/resourceowner.js"></script>
+<script src="${ctx}/static/js/api.js"></script>
 </body>
 </html>

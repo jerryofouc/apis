@@ -13,7 +13,10 @@
             <a href="${ctx}/manage/resourceOwner"><i class="icon-chevron-right"></i>Resource Owner管理</a>
         </li>
         <li id="li-openapi">
-            <a href="${ctx}/manage/resourceServer"><i class="icon-chevron-right"></i>OpenApi 管理</a>
+            <a href="${ctx}/manage/api"><i class="icon-chevron-right"></i>OpenApi 管理</a>
+        </li>
+        <li id="li-accesstoken">
+            <a href="${ctx}/manage/api"><i class="icon-chevron-right"></i>AccessToken 管理</a>
         </li>
     </ul>
 </div>

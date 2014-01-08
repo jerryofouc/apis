@@ -29,7 +29,49 @@ public class AccessRestApi extends AbstractEntity{
     @XmlTransient
     private ResourceServer resourceServer;
 
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "resourceowner_to_scope_id", nullable = false)
+    @XmlTransient
+    private ResourceOwnerToScope resourceOwnerToScope;
 
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "resourceowner_id", nullable = false)
+    @XmlTransient
+    private ResourceOwner resourceOwner;
+
+
+    @Column
+    private String description;
+
+    @Transient
+    private Long resourceOwnerId;
+
+    @Transient
+    private Long scopeId;
+
+    public Long getResourceOwnerId() {
+        return resourceOwnerId;
+    }
+
+    public void setResourceOwnerId(Long resourceOwnerId) {
+        this.resourceOwnerId = resourceOwnerId;
+    }
+
+    public Long getScopeId() {
+        return scopeId;
+    }
+
+    public void setScopeId(Long scopeId) {
+        this.scopeId = scopeId;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
     public String getCompleteUrl() {
         return completeUrl;
@@ -47,4 +89,19 @@ public class AccessRestApi extends AbstractEntity{
         this.resourceServer = resourceServer;
     }
 
+    public ResourceOwnerToScope getResourceOwnerToScope() {
+        return resourceOwnerToScope;
+    }
+
+    public void setResourceOwnerToScope(ResourceOwnerToScope resourceOwnerToScope) {
+        this.resourceOwnerToScope = resourceOwnerToScope;
+    }
+
+    public ResourceOwner getResourceOwner() {
+        return resourceOwner;
+    }
+
+    public void setResourceOwner(ResourceOwner resourceOwner) {
+        this.resourceOwner = resourceOwner;
+    }
 }
