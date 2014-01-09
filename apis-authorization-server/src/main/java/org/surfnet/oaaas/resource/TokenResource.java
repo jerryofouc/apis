@@ -18,6 +18,7 @@
  */
 package org.surfnet.oaaas.resource;
 
+import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
@@ -177,9 +178,19 @@ public class TokenResource {
         AuthenticatedPrincipal principal = request.getPrincipal();
         AuthenticatedPrincipal authenticatedPrincipal = request.getPrincipal();
         String uniqueName = authenticatedPrincipal.getName();
-
+        //得到所有scopeName
+        List<String> scopeNames = Lists.transform(resourceOwnerToScopes,new Function<ResourceOwnerToScope, String>() {
+            @Override
+            public String apply( org.surfnet.oaaas.model.ResourceOwnerToScope input) {
+                if(input.getResourceServerScope() != null){
+                    return input.getResourceServerScope().getName();
+                }else{
+                    return null;
+                }
+            }
+        });
         AccessToken token = new AccessToken(getTokenValue(), principal, client, expires,
-                request.getGrantedScopes(), refreshToken); //创建token
+                scopeNames, refreshToken); //创建token
         ResourceOwner resourceOwner = resourceOwnerRepository.findByName(uniqueName);
         token.setResourceOwner(resourceOwner);//设置ResourceOwner
         token = accessTokenRepository.save(token);
