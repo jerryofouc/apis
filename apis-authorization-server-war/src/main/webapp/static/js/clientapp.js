@@ -56,7 +56,6 @@ function validateForm(){
             },
             redirectUris:{
                 required:true,
-                url:true
             },
             contactName:"required",
             contactEmail:"required email",
@@ -71,7 +70,6 @@ function validateForm(){
             },
             redirectUris : {
                 required:'不为空',
-                url: '请使用正确格式的url'
             },
             contactName:"不为空",
             contactEmail:{

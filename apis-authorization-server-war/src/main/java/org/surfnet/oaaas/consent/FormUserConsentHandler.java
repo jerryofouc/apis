@@ -84,7 +84,7 @@ public class FormUserConsentHandler extends AbstractUserConsentHandler {
     if (!CollectionUtils.isEmpty(tokens)) {//TO后面再改
       // If another token is already present for this resource owner and client, no new consent should be requested
       List<String> grantedScopes = tokens.get(0).getScopes(); // take the scopes of the first access token found.
-      setGrantedScopes(request, grantedScopes.toArray(new String[grantedScopes.size()]));
+      setGrantedScopes(request, grantedScopes);
       chain.doFilter(request, response);
     } else {
         AuthorizationRequest authorizationRequest = authorizationRequestRepository.findByAuthState(authStateValue);
@@ -131,11 +131,9 @@ public class FormUserConsentHandler extends AbstractUserConsentHandler {
       throws ServletException, IOException {
     if (Boolean.valueOf(request.getParameter(USER_OAUTH_APPROVAL))) {
       setAuthStateValue(request, request.getParameter(AUTH_STATE));
-      String[] apis = request.getParameterValues(GRANTED_APIS);
-      List<String> apiList = (apis==null?(new ArrayList<String>()):Arrays.asList(apis));
-      setGrantedApis(request,apiList);
-     // String[] scopes = request.getParameterValues(GRANTED_APIS);
-    //  setGrantedScopes(request, scopes);
+      String[] scopes = request.getParameterValues(GRANTED_SCOPES);
+      List<String> scopeList = (scopes==null?(new ArrayList<String>()):Arrays.asList(scopes));
+      setGrantedScopes(request,scopeList);
       return true;
     } else {
       request.getRequestDispatcher(getUserConsentDeniedUrl()).forward(request, response);
@@ -148,10 +146,5 @@ public class FormUserConsentHandler extends AbstractUserConsentHandler {
    */
   protected String getUserConsentDeniedUrl() {
     return "/WEB-INF/jsp/userconsent_denied.jsp";
-  }
-
-  public void setGrantedApis(HttpServletRequest request, List<String> grantedApis) {
-      request.setAttribute(AbstractUserConsentHandler.GRANTED_APIS,grantedApis);
-
   }
 }

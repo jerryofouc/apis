@@ -59,7 +59,7 @@
                     <tr>
                         <c:if test="${status.first}">
                             <td rowspan="${fn:length(scope.accessRestApis)}">
-                                <input type="checkbox" checked="true" id="GRANTED_APIS" name="GRANTED_APIS" value="${scope.resourceServerScope.id}"/>
+                                <input type="checkbox" checked="true" id="GRANTED_SCOPES" name="GRANTED_SCOPES" value="${scope.id}"/>
                             </td>
                             <td rowspan="${fn:length(scope.accessRestApis)}">
                                     ${scope.resourceServerScope.name}

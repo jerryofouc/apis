@@ -16,6 +16,6 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 @Repository
-public interface ResourceOwnerToScopeApiRepository extends CrudRepository<ResourceOwnerToScope, Long> {
+public interface ResourceOwnerToScopeRepository extends CrudRepository<ResourceOwnerToScope, Long> {
     List<ResourceOwnerToScope> findByResourceOwnerIdAndResourceServerScopeId(Long resourceOwnerId,Long resourceServerScopeId);
 }

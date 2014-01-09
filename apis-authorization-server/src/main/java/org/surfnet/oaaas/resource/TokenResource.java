@@ -52,230 +52,235 @@ import static org.surfnet.oaaas.auth.OAuth2Validator.*;
 /**
  * Resource for handling all calls related to tokens. It adheres to <a
  * href="http://tools.ietf.org/html/draft-ietf-oauth-v2"> the OAuth spec</a>.
- *
  */
 @Named
 @Path("/")
 public class TokenResource {
 
-  public static final String BASIC_REALM = "Basic realm=\"OAuth2 Secure\"";
+    public static final String BASIC_REALM = "Basic realm=\"OAuth2 Secure\"";
 
-  public static final String WWW_AUTHENTICATE = "WWW-Authenticate";
+    public static final String WWW_AUTHENTICATE = "WWW-Authenticate";
 
-  @Inject
-  private AuthorizationRequestRepository authorizationRequestRepository;
+    @Inject
+    private AuthorizationRequestRepository authorizationRequestRepository;
 
-  @Inject
-  private ResourceOwnerRepository resourceOwnerRepository;
+    @Inject
+    private ResourceOwnerRepository resourceOwnerRepository;
 
-  @Inject
-  private AccessTokenRepository accessTokenRepository;
+    @Inject
+    private AccessTokenRepository accessTokenRepository;
+
+    @Inject
+    private ResourceOwnerToScopeRepository resourceOwnerToScopeRepository;
+
+    @Inject
+    private AccessRestApiRepository accessRestApiRepository;
+
+    @Inject
+    private OAuth2Validator oAuth2Validator;
+
+    @Inject
+    private ResourceOwnerScopeToAccessTokenRepository resourceOwnerScopeToAccessTokenRepository;
 
 
-  @Inject
-  private AccessRestApiRepository accessRestApiRepository;
+    private static final Logger LOG = LoggerFactory.getLogger(TokenResource.class);
 
-  @Inject
-  private OAuth2Validator oAuth2Validator;
-
-  private static final Logger LOG = LoggerFactory.getLogger(TokenResource.class);
-
-  @GET
-  @Path("/authorize")
-  public Response authorizeCallbackGet(@Context
-  HttpServletRequest request) {
-    return authorizeCallback(request);
-  }
-
-  /**
-   * Entry point for the authorize call which needs to return an authorization
-   * code or (implicit grant) an access token
-   *
-   * @param request
-   *          the {@link HttpServletRequest}
-   * @return Response the response
-   */
-  @POST
-  @Produces(MediaType.TEXT_HTML)
-  @Path("/authorize")
-  public Response authorizeCallback(@Context
-  HttpServletRequest request) {
-    return doProcess(request);
-  }
-
-  /**
-   * Called after the user has given consent
-   *
-   * @param request
-   *          the {@link HttpServletRequest}
-   * @return Response the response
-   */
-  @POST
-  @Produces(MediaType.TEXT_HTML)
-  @Path("/consent")
-  public Response consentCallback(@Context
-  HttpServletRequest request) {
-    return doProcess(request);
-  }
-
-  private Response doProcess(HttpServletRequest request) {
-    AuthorizationRequest authReq = findAuthorizationRequest(request);
-    if (authReq == null) {
-      return serverError("Not a valid AbstractAuthenticator.AUTH_STATE on the Request");
+    @GET
+    @Path("/authorize")
+    public Response authorizeCallbackGet(@Context
+                                         HttpServletRequest request) {
+        return authorizeCallback(request);
     }
-    processScopes(authReq, request);
-    List<String> apiList = (List<String>)request.getAttribute(AbstractUserConsentHandler.GRANTED_APIS);
 
-    if (authReq.getResponseType().equals(OAuth2Validator.IMPLICIT_GRANT_RESPONSE_TYPE)) {
-      AccessToken token = createAccessToken( authReq, true);
-      return sendImplicitGrantResponse(authReq, token);
-    } else {
-      return sendAuthorizationCodeResponse(apiList,authReq);
+    /**
+     * Entry point for the authorize call which needs to return an authorization
+     * code or (implicit grant) an access token
+     *
+     * @param request the {@link HttpServletRequest}
+     * @return Response the response
+     */
+    @POST
+    @Produces(MediaType.TEXT_HTML)
+    @Path("/authorize")
+    public Response authorizeCallback(@Context
+                                      HttpServletRequest request) {
+        return doProcess(request);
     }
-  }
 
-  /*
-   * In the user consent filter the scopes are (possible) set on the Request
-   */
-  private void processScopes(AuthorizationRequest authReq, HttpServletRequest request) {
-    if (authReq.getClient().isSkipConsent()) {
-      // return the scopes in the authentication request since the requested scopes are stored in the
-      // authorizationRequest.
-      authReq.setGrantedScopes(authReq.getRequestedScopes());
-    } else {
-      List<String> grantedAPIS = (List<String>) request.getAttribute(AbstractUserConsentHandler.GRANTED_APIS);
-      if (grantedAPIS!=null && !grantedAPIS.isEmpty()) {
-        authReq.setGrantedScopes(grantedAPIS);
-      } else {
-        authReq.setGrantedScopes(null);
-      }
+    /**
+     * Called after the user has given consent
+     *
+     * @param request the {@link HttpServletRequest}
+     * @return Response the response
+     */
+    @POST
+    @Produces(MediaType.TEXT_HTML)
+    @Path("/consent")
+    public Response consentCallback(@Context
+                                    HttpServletRequest request) {
+        return doProcess(request);
     }
-  }
 
-  private AccessToken createAccessToken( AuthorizationRequest request, boolean isImplicitGrant) {
-    Client client = request.getClient();
-    Preconditions.checkNotNull(client);
-    ResourceServer resourceServer = client.getResourceServer();
-    Preconditions.checkNotNull(resourceServer);
-      final String secret = resourceServer.getSecret();
-      List<AccessRestApi> accessRestApiList = Lists.newArrayList();
-      List<String> completeUrlList = Lists.newArrayList();
-      if(request.getGrantedScopes() != null){
-          for(String apidId : request.getGrantedScopes()){
-              AccessRestApi accessRestApi = accessRestApiRepository.findOne(Long.parseLong(apidId));
-              accessRestApiList.add(accessRestApi);
-              completeUrlList.add(accessRestApi.getCompleteUrl());
-          }
-      }
-    long expireDuration = client.getExpireDuration();
-    long expires = (expireDuration == 0L ? 0L : (System.currentTimeMillis() + (1000 * expireDuration)));
-    String refreshToken = (client.isUseRefreshTokens() && !isImplicitGrant) ? getTokenValue(completeUrlList,secret,true) : null;
-    AuthenticatedPrincipal principal = request.getPrincipal();
-    if(request.getGrantedScopes() != null){
-        for(String apidId : request.getGrantedScopes()){
-            AccessRestApi accessRestApi = accessRestApiRepository.findOne(Long.parseLong(apidId));
-            accessRestApiList.add(accessRestApi);
-            completeUrlList.add(accessRestApi.getCompleteUrl());
+    private Response doProcess(HttpServletRequest request) {
+        AuthorizationRequest authReq = findAuthorizationRequest(request);
+        if (authReq == null) {
+            return serverError("Not a valid AbstractAuthenticator.AUTH_STATE on the Request");
+        }
+        processScopes(authReq, request);
+        List<String> scopeList = (List<String>) request.getAttribute(AbstractUserConsentHandler.GRANTED_SCOPES);
+
+        if (authReq.getResponseType().equals(OAuth2Validator.IMPLICIT_GRANT_RESPONSE_TYPE)) {
+            AccessToken token = createAccessToken(authReq, true);
+            return sendImplicitGrantResponse(authReq, token);
+        } else {
+            return sendAuthorizationCodeResponse(scopeList, authReq);
         }
     }
-    AuthenticatedPrincipal authenticatedPrincipal = request.getPrincipal();
-    String uniqueName = authenticatedPrincipal.getName();
 
-    AccessToken token = new AccessToken(getTokenValue(completeUrlList,secret,false), principal, client, expires,
-        request.getGrantedScopes(), refreshToken);
-    ResourceOwner resourceOwner = resourceOwnerRepository.findByName(uniqueName);
-    token.setResourceOwner(resourceOwner);
-    token = accessTokenRepository.save(token);
-    for(String apidId : request.getGrantedScopes()){
-//        AccessRestApi accessRestApi = accessRestApiRepository.findOne(Long.parseLong(apidId));
-//        AccessTokenToAccessRestApi accessTokenToAccessRestApi = new AccessTokenToAccessRestApi();
-//        accessTokenToAccessRestApi.setAccessRestApi(accessRestApi);
-//        accessTokenToAccessRestApi.setAccessToken(token);
-//        accessTokenToAccessRestApiRepository.save(accessTokenToAccessRestApi);
+    /*
+     * In the user consent filter the scopes are (possible) set on the Request
+     */
+    private void processScopes(AuthorizationRequest authReq, HttpServletRequest request) {
+        if (authReq.getClient().isSkipConsent()) {
+            // return the scopes in the authentication request since the requested scopes are stored in the
+            // authorizationRequest.
+            authReq.setGrantedScopes(authReq.getRequestedScopes());
+        } else {
+            List<String> grantedScopes = (List<String>) request.getAttribute(AbstractUserConsentHandler.GRANTED_SCOPES);
+            if (grantedScopes != null && !grantedScopes.isEmpty()) {
+                authReq.setGrantedScopes(grantedScopes);
+            } else {
+                authReq.setGrantedScopes(null);
+            }
+        }
     }
-    return token;
-  }
 
-  private AuthorizationRequest findAuthorizationRequest(HttpServletRequest request) {
-    String authState = (String) request.getAttribute(AbstractAuthenticator.AUTH_STATE);
-    return authorizationRequestRepository.findByAuthState(authState);
-  }
+    private AccessToken createAccessToken(AuthorizationRequest request, boolean isImplicitGrant) {
+        Client client = request.getClient();
+        Preconditions.checkNotNull(client);
+        ResourceServer resourceServer = client.getResourceServer();
+        Preconditions.checkNotNull(resourceServer);
+        final String secret = resourceServer.getSecret();
+        List<String> completeUrlList = Lists.newArrayList();
+        List<ResourceOwnerToScope> resourceOwnerToScopes = Lists.newArrayList();
+        if (request.getGrantedScopes() != null) {
+            for (String resourceOwnerToScopeId : request.getGrantedScopes()) {
+                ResourceOwnerToScope resourceOwnerToScope = resourceOwnerToScopeRepository.findOne(Long.parseLong(resourceOwnerToScopeId));
+                if (resourceOwnerToScope != null) {
+                    resourceOwnerToScopes.add(resourceOwnerToScope);
+                }
+            }
+        }
+        long expireDuration = client.getExpireDuration();
+        long expires = (expireDuration == 0L ? 0L : (System.currentTimeMillis() + (1000 * expireDuration)));
+        String refreshToken = (client.isUseRefreshTokens() && !isImplicitGrant) ? getTokenValue() : null;
+        AuthenticatedPrincipal principal = request.getPrincipal();
+        AuthenticatedPrincipal authenticatedPrincipal = request.getPrincipal();
+        String uniqueName = authenticatedPrincipal.getName();
 
-  @POST
-  @Path("/token")
-  @Produces(MediaType.APPLICATION_JSON)
-  @Consumes("application/x-www-form-urlencoded")
-  public Response token(@HeaderParam("Authorization")
-  String authorization, final MultivaluedMap<String, String> formParameters) {
-    AccessTokenRequest accessTokenRequest = AccessTokenRequest.fromMultiValuedFormParameters(formParameters);
-    UserPassCredentials credentials = getUserPassCredentials(authorization, accessTokenRequest);
-    String grantType = accessTokenRequest.getGrantType();
-    if (GRANT_TYPE_CLIENT_CREDENTIALS.equals(grantType)) {
-      accessTokenRequest.setClientId(credentials.getUsername());
+        AccessToken token = new AccessToken(getTokenValue(), principal, client, expires,
+                request.getGrantedScopes(), refreshToken); //创建token
+        ResourceOwner resourceOwner = resourceOwnerRepository.findByName(uniqueName);
+        token.setResourceOwner(resourceOwner);//设置ResourceOwner
+        token = accessTokenRepository.save(token);
+        saveAccessTokenScopeRelation(token, resourceOwnerToScopes);//保存AccessToken和Scope的关系
+        return token;
     }
-    ValidationResponse vr = oAuth2Validator.validate(accessTokenRequest);
-    if (!vr.valid()) {
-      return sendErrorResponse(vr);
-    }
-    AuthorizationRequest request;
-    try {
-      if (GRANT_TYPE_AUTHORIZATION_CODE.equals(grantType)) {
-        request = authorizationCodeToken(accessTokenRequest);
-      } else if (GRANT_TYPE_REFRESH_TOKEN.equals(grantType)) {
-        request = refreshTokenToken(accessTokenRequest);
-      } else if (GRANT_TYPE_CLIENT_CREDENTIALS.equals(grantType)) {
-        request =  new AuthorizationRequest();
-        request.setClient(accessTokenRequest.getClient());
-        // We have to construct a AuthenticatedPrincipal on-the-fly as there is only key-secret authentication
-        request.setPrincipal(new AuthenticatedPrincipal(request.getClient().getClientId()));
-        // Apply all client scopes to the access token.
-        // TODO: take into account given scopes from the request
-       // request.setGrantedScopes(request.getClient().getScopes());
-      }
-      else {
-        return sendErrorResponse(ValidationResponse.UNSUPPORTED_GRANT_TYPE);
-      }
-    } catch (ValidationResponseException e) {
-      return sendErrorResponse(e.v);
-    }
-    if (!request.getClient().isExactMatch(credentials)) {
-      return Response.status(Status.UNAUTHORIZED).header(WWW_AUTHENTICATE, BASIC_REALM).build();
-    }
-    AccessToken token = createAccessToken(request, false);
 
-    AccessTokenResponse response = new AccessTokenResponse(token.getToken(), BEARER, request.getClient()
-        .getExpireDuration(), token.getRefreshToken(), StringUtils.join(token.getScopes(), ','));
-
-    return Response.ok().entity(response).build();
-
-  }
-
-  private AuthorizationRequest authorizationCodeToken(AccessTokenRequest accessTokenRequest) {
-    AuthorizationRequest authReq = authorizationRequestRepository.findByAuthorizationCode(accessTokenRequest.getCode());
-    if (authReq == null) {
-      throw new ValidationResponseException(ValidationResponse.INVALID_GRANT_AUTHORIZATION_CODE);
+    /**
+     * 保存AccessToken和ResourceOwner对Scope的多对多关系
+     *
+     * @param token
+     * @param resourceOwnerToScopes
+     */
+    private void saveAccessTokenScopeRelation(AccessToken token, List<ResourceOwnerToScope> resourceOwnerToScopes) {
+        for (ResourceOwnerToScope resourceOwnerToScope : resourceOwnerToScopes) {
+            ResourceOwnerScopeToAccessToken resourceOwnerScopeToAccessToken = new ResourceOwnerScopeToAccessToken();
+            resourceOwnerScopeToAccessToken.setResourceOwnerToScope(resourceOwnerToScope);
+            resourceOwnerScopeToAccessToken.setAccessToken(token);
+            resourceOwnerScopeToAccessTokenRepository.save(resourceOwnerScopeToAccessToken);
+        }
     }
-    String uri = accessTokenRequest.getRedirectUri();
-    if (!authReq.getRedirectUri().equalsIgnoreCase(uri)) {
-      throw new ValidationResponseException(ValidationResponse.REDIRECT_URI_DIFFERENT);
-    }
-    authorizationRequestRepository.delete(authReq);
-    return authReq;
-  }
 
-  private AuthorizationRequest refreshTokenToken(AccessTokenRequest accessTokenRequest) {
-    AccessToken accessToken = accessTokenRepository.findByRefreshToken(accessTokenRequest.getRefreshToken());
-    if (accessToken == null) {
-      throw new ValidationResponseException(ValidationResponse.INVALID_GRANT_REFRESH_TOKEN);
+    private AuthorizationRequest findAuthorizationRequest(HttpServletRequest request) {
+        String authState = (String) request.getAttribute(AbstractAuthenticator.AUTH_STATE);
+        return authorizationRequestRepository.findByAuthState(authState);
     }
-    AuthorizationRequest request = new AuthorizationRequest();
-    request.setClient(accessToken.getClient());
-    request.setPrincipal(accessToken.getPrincipal());
-    request.setGrantedScopes(accessToken.getScopes());
-    accessTokenRepository.delete(accessToken);
-    return request;
 
-  }
+    @POST
+    @Path("/token")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes("application/x-www-form-urlencoded")
+    public Response token(@HeaderParam("Authorization")
+                          String authorization, final MultivaluedMap<String, String> formParameters) {
+        AccessTokenRequest accessTokenRequest = AccessTokenRequest.fromMultiValuedFormParameters(formParameters);
+        UserPassCredentials credentials = getUserPassCredentials(authorization, accessTokenRequest);
+        String grantType = accessTokenRequest.getGrantType();
+        if (GRANT_TYPE_CLIENT_CREDENTIALS.equals(grantType)) {
+            accessTokenRequest.setClientId(credentials.getUsername());
+        }
+        ValidationResponse vr = oAuth2Validator.validate(accessTokenRequest);
+        if (!vr.valid()) {
+            return sendErrorResponse(vr);
+        }
+        AuthorizationRequest request;
+        try {
+            if (GRANT_TYPE_AUTHORIZATION_CODE.equals(grantType)) {
+                request = authorizationCodeToken(accessTokenRequest);
+            } else if (GRANT_TYPE_REFRESH_TOKEN.equals(grantType)) {
+                request = refreshTokenToken(accessTokenRequest);
+            } else if (GRANT_TYPE_CLIENT_CREDENTIALS.equals(grantType)) {
+                request = new AuthorizationRequest();
+                request.setClient(accessTokenRequest.getClient());
+                // We have to construct a AuthenticatedPrincipal on-the-fly as there is only key-secret authentication
+                request.setPrincipal(new AuthenticatedPrincipal(request.getClient().getClientId()));
+                // Apply all client scopes to the access token.
+                // TODO: take into account given scopes from the request
+                // request.setGrantedScopes(request.getClient().getScopes());
+            } else {
+                return sendErrorResponse(ValidationResponse.UNSUPPORTED_GRANT_TYPE);
+            }
+        } catch (ValidationResponseException e) {
+            return sendErrorResponse(e.v);
+        }
+        if (!request.getClient().isExactMatch(credentials)) {
+            return Response.status(Status.UNAUTHORIZED).header(WWW_AUTHENTICATE, BASIC_REALM).build();
+        }
+        AccessToken token = createAccessToken(request, false);
+
+        AccessTokenResponse response = new AccessTokenResponse(token.getToken(), BEARER, request.getClient()
+                .getExpireDuration(), token.getRefreshToken(), StringUtils.join(token.getScopes(), ','));
+
+        return Response.ok().entity(response).build();
+
+    }
+
+    private AuthorizationRequest authorizationCodeToken(AccessTokenRequest accessTokenRequest) {
+        AuthorizationRequest authReq = authorizationRequestRepository.findByAuthorizationCode(accessTokenRequest.getCode());
+        if (authReq == null) {
+            throw new ValidationResponseException(ValidationResponse.INVALID_GRANT_AUTHORIZATION_CODE);
+        }
+        String uri = accessTokenRequest.getRedirectUri();
+        if (!authReq.getRedirectUri().equalsIgnoreCase(uri)) {
+            throw new ValidationResponseException(ValidationResponse.REDIRECT_URI_DIFFERENT);
+        }
+        authorizationRequestRepository.delete(authReq);
+        return authReq;
+    }
+
+    private AuthorizationRequest refreshTokenToken(AccessTokenRequest accessTokenRequest) {
+        AccessToken accessToken = accessTokenRepository.findByRefreshToken(accessTokenRequest.getRefreshToken());
+        if (accessToken == null) {
+            throw new ValidationResponseException(ValidationResponse.INVALID_GRANT_REFRESH_TOKEN);
+        }
+        AuthorizationRequest request = new AuthorizationRequest();
+        request.setClient(accessToken.getClient());
+        request.setPrincipal(accessToken.getPrincipal());
+        request.setGrantedScopes(accessToken.getScopes());
+        accessTokenRepository.delete(accessToken);
+        return request;
+
+    }
 
   /*
    * http://tools.ietf.org/html/draft-ietf-oauth-v2#section-2.3.1
@@ -284,104 +289,77 @@ public class TokenResource {
    * include the secret and id in the request body
    */
 
-  private UserPassCredentials getUserPassCredentials(String authorization, AccessTokenRequest accessTokenRequest) {
-    return StringUtils.isBlank(authorization) ? new UserPassCredentials(accessTokenRequest.getClientId(),
-        accessTokenRequest.getClientSecret()) : new UserPassCredentials(authorization);
-  }
-
-  private Response sendAuthorizationCodeResponse(List<String> apiList, AuthorizationRequest authReq) {
-    String uri = authReq.getRedirectUri();
-    Client client = authReq.getClient();
-    Preconditions.checkNotNull(client);
-      ResourceServer resourceServer = client.getResourceServer();
-      Preconditions.checkNotNull(resourceServer);
-      final String secret = resourceServer.getSecret();
-      List<AccessRestApi> accessRestApiList = Lists.newArrayList();
-      List<String> completeUrlList = Lists.newArrayList();
-      if(apiList == null){
-          apiList = Lists.newArrayList();
-      }
-      for(String apidId : apiList){
-          AccessRestApi accessRestApi = accessRestApiRepository.findOne(Long.parseLong(apidId));
-          accessRestApiList.add(accessRestApi);
-          completeUrlList.add(accessRestApi.getCompleteUrl());
-      }
-    String authorizationCode = getTokenValue(completeUrlList,secret,false);
-    authReq.setAuthorizationCode(authorizationCode);
-    authReq = authorizationRequestRepository.save(authReq);
-    uri = uri + appendQueryMark(uri) + "code=" + authorizationCode + appendStateParameter(authReq);
-    return Response.seeOther(UriBuilder.fromUri(uri).build()).build();
-  }
-
-  protected String getTokenValue(List<String> allURLs,String secret,boolean isRefresh) {
-        return UUID.randomUUID().toString();
- //TODO 用加密解密模块来做
-//    String allAccessURL = Joiner.on(",").join(allURLs);
-//      UUID rand = UUID.randomUUID();
-//      try {
-//          return Hex.encodeHexString(AES.encrypt(rand + ":" + allAccessURL,secret)) ;
-//      } catch (Exception e) {
-//          e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-//      }
-//      return null;
-  }
-
-  private Response sendErrorResponse(String error, String description) {
-    return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse(error, description)).build();
-  }
-
-  private Response sendErrorResponse(ValidationResponse response) {
-    return sendErrorResponse(response.getValue(), response.getDescription());
-  }
-
-  private Response sendImplicitGrantResponse(AuthorizationRequest authReq, AccessToken accessToken) {
-    String uri = authReq.getRedirectUri();
-    String fragment = String.format("access_token=%s&token_type=bearer&expires_in=%s&scope=%s"
-        + appendStateParameter(authReq), accessToken.getToken(), accessToken.getExpires(), StringUtils.join(authReq.getGrantedScopes(), ','));
-    if (authReq.getClient().isIncludePrincipal()) {
-      fragment += String.format("&principal=%s", authReq.getPrincipal().getDisplayName()) ;
+    private UserPassCredentials getUserPassCredentials(String authorization, AccessTokenRequest accessTokenRequest) {
+        return StringUtils.isBlank(authorization) ? new UserPassCredentials(accessTokenRequest.getClientId(),
+                accessTokenRequest.getClientSecret()) : new UserPassCredentials(authorization);
     }
-    return Response.seeOther(UriBuilder.fromUri(uri).fragment(fragment).build()).build();
+
+    private Response sendAuthorizationCodeResponse(List<String> apiList, AuthorizationRequest authReq) {
+        String uri = authReq.getRedirectUri();
+        String authorizationCode = getTokenValue();
+        authReq.setAuthorizationCode(authorizationCode);
+        authReq = authorizationRequestRepository.save(authReq);
+        uri = uri + appendQueryMark(uri) + "code=" + authorizationCode + appendStateParameter(authReq);
+        return Response.seeOther(UriBuilder.fromUri(uri).build()).build();
+    }
+
+    protected String getTokenValue() {
+        return UUID.randomUUID().toString();
+    }
+
+    private Response sendErrorResponse(String error, String description) {
+        return Response.status(Status.BAD_REQUEST).entity(new ErrorResponse(error, description)).build();
+    }
+
+    private Response sendErrorResponse(ValidationResponse response) {
+        return sendErrorResponse(response.getValue(), response.getDescription());
+    }
+
+    private Response sendImplicitGrantResponse(AuthorizationRequest authReq, AccessToken accessToken) {
+        String uri = authReq.getRedirectUri();
+        String fragment = String.format("access_token=%s&token_type=bearer&expires_in=%s&scope=%s"
+                + appendStateParameter(authReq), accessToken.getToken(), accessToken.getExpires(), StringUtils.join(authReq.getGrantedScopes(), ','));
+        if (authReq.getClient().isIncludePrincipal()) {
+            fragment += String.format("&principal=%s", authReq.getPrincipal().getDisplayName());
+        }
+        return Response.seeOther(UriBuilder.fromUri(uri).fragment(fragment).build()).build();
 
 
-  }
+    }
 
-  private String appendQueryMark(String uri) {
-    return uri.contains("?") ? "&" : "?";
-  }
+    private String appendQueryMark(String uri) {
+        return uri.contains("?") ? "&" : "?";
+    }
 
-  private String appendStateParameter(AuthorizationRequest authReq) {
-    String state = authReq.getState();
-    return StringUtils.isBlank(state) ? "" : "&state=".concat(state);
-  }
+    private String appendStateParameter(AuthorizationRequest authReq) {
+        String state = authReq.getState();
+        return StringUtils.isBlank(state) ? "" : "&state=".concat(state);
+    }
 
-  private Response serverError(String msg) {
-    LOG.warn(msg);
-    return Response.serverError().build();
-  }
+    private Response serverError(String msg) {
+        LOG.warn(msg);
+        return Response.serverError().build();
+    }
 
-  /**
-   * @param authorizationRequestRepository
-   *          the authorizationRequestRepository to set
-   */
-  public void setAuthorizationRequestRepository(AuthorizationRequestRepository authorizationRequestRepository) {
-    this.authorizationRequestRepository = authorizationRequestRepository;
-  }
+    /**
+     * @param authorizationRequestRepository the authorizationRequestRepository to set
+     */
+    public void setAuthorizationRequestRepository(AuthorizationRequestRepository authorizationRequestRepository) {
+        this.authorizationRequestRepository = authorizationRequestRepository;
+    }
 
-  /**
-   * @param accessTokenRepository
-   *          the accessTokenRepository to set
-   */
-  public void setAccessTokenRepository(AccessTokenRepository accessTokenRepository) {
-    this.accessTokenRepository = accessTokenRepository;
-  }
+    /**
+     * @param accessTokenRepository the accessTokenRepository to set
+     */
+    public void setAccessTokenRepository(AccessTokenRepository accessTokenRepository) {
+        this.accessTokenRepository = accessTokenRepository;
+    }
 
-  /**
-   * @param oAuth2Validator
-   *          the oAuth2Validator to set
-   */
-  public void setoAuth2Validator(OAuth2Validator oAuth2Validator) {
-    this.oAuth2Validator = oAuth2Validator;
-  }
+    /**
+     * @param oAuth2Validator the oAuth2Validator to set
+     */
+    public void setoAuth2Validator(OAuth2Validator oAuth2Validator) {
+        this.oAuth2Validator = oAuth2Validator;
+    }
 
 }

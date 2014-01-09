@@ -39,7 +39,7 @@ public class ApiController extends AbstractBaseController{
     private ResourceOwnerRepository resourceOwnerRepository;
 
     @Inject
-    private ResourceOwnerToScopeApiRepository resourceOwnerToScopeApiRepository;
+    private ResourceOwnerToScopeRepository resourceOwnerToScopeRepository;
 
     @RequestMapping(value = "", method = RequestMethod.GET)
     public String list(Model model){
@@ -79,7 +79,7 @@ public class ApiController extends AbstractBaseController{
         }
 
         ResourceOwnerToScope resourceOwnerToScope = null;
-        List<ResourceOwnerToScope> resourceOwnerToScopes = resourceOwnerToScopeApiRepository.findByResourceOwnerIdAndResourceServerScopeId(resourceOwnerId,resourceServerScopeId);
+        List<ResourceOwnerToScope> resourceOwnerToScopes = resourceOwnerToScopeRepository.findByResourceOwnerIdAndResourceServerScopeId(resourceOwnerId,resourceServerScopeId);
         if(resourceOwnerToScopes !=null && resourceOwnerToScopes.size() > 1){
             throw new IllegalArgumentException("不正常的resourceOwnerToScope");
         }
@@ -87,7 +87,7 @@ public class ApiController extends AbstractBaseController{
             ResourceOwnerToScope temp = new ResourceOwnerToScope();
             temp.setResourceServerScope(resourceServerScope);
             temp.setResourceOwner(resourceOwner);
-            resourceOwnerToScope = resourceOwnerToScopeApiRepository.save(temp);
+            resourceOwnerToScope = resourceOwnerToScopeRepository.save(temp);
         }else{
             resourceOwnerToScope = resourceOwnerToScopes.get(0);
         }

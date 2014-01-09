@@ -19,6 +19,7 @@
 package org.surfnet.oaaas.auth;
 
 import java.io.IOException;
+import java.util.List;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
@@ -37,7 +38,6 @@ public abstract class AbstractUserConsentHandler extends AbstractFilter {
    * and consumed by the authorization endpoint.
    */
   public static final String GRANTED_SCOPES = "GRANTED_SCOPES";
-  public static final String GRANTED_APIS =  "GRANTED_APIS";
 
   /**
    * Constant to get the Client when the control should be returned to the
@@ -66,7 +66,7 @@ public abstract class AbstractUserConsentHandler extends AbstractFilter {
 
   /**
    * Implement this method to perform the actual authentication. Use
-   * {@link org.surfnet.oaaas.consent.FormUserConsentHandler
+   * {@link org.surfnet.oaaas.consent.FormUserConsentHandler}
    * FormUserConsentHandler} as an example.
    *
    * In general, the contract is:
@@ -119,7 +119,7 @@ public abstract class AbstractUserConsentHandler extends AbstractFilter {
    * @param scopes
    *          the {@link String[]} scopes.
    */
-  protected final void setGrantedScopes(ServletRequest request, String[] scopes) {
+  protected final void setGrantedScopes(ServletRequest request,List<String> scopes) {
     request.setAttribute(GRANTED_SCOPES, scopes);
   }
 
