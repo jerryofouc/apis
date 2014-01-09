@@ -71,8 +71,6 @@ public class TokenResource {
   @Inject
   private AccessTokenRepository accessTokenRepository;
 
-  @Inject
-  private AccessTokenToAccessRestApiRepository accessTokenToAccessRestApiRepository;
 
   @Inject
   private AccessRestApiRepository accessRestApiRepository;
@@ -189,11 +187,11 @@ public class TokenResource {
     token.setResourceOwner(resourceOwner);
     token = accessTokenRepository.save(token);
     for(String apidId : request.getGrantedScopes()){
-        AccessRestApi accessRestApi = accessRestApiRepository.findOne(Long.parseLong(apidId));
-        AccessTokenToAccessRestApi accessTokenToAccessRestApi = new AccessTokenToAccessRestApi();
-        accessTokenToAccessRestApi.setAccessRestApi(accessRestApi);
-        accessTokenToAccessRestApi.setAccessToken(token);
-        accessTokenToAccessRestApiRepository.save(accessTokenToAccessRestApi);
+//        AccessRestApi accessRestApi = accessRestApiRepository.findOne(Long.parseLong(apidId));
+//        AccessTokenToAccessRestApi accessTokenToAccessRestApi = new AccessTokenToAccessRestApi();
+//        accessTokenToAccessRestApi.setAccessRestApi(accessRestApi);
+//        accessTokenToAccessRestApi.setAccessToken(token);
+//        accessTokenToAccessRestApiRepository.save(accessTokenToAccessRestApi);
     }
     return token;
   }

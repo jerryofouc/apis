@@ -26,6 +26,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import com.google.common.collect.Lists;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.surfnet.oaaas.auth.principal.UserPassCredentials;
 
@@ -373,6 +374,24 @@ public class Client extends AbstractEntity {
 
     public Set<ClientToScope> getClientToScopes() {
         return clientToScopes;
+    }
+
+    /**
+     * 根据自己允许的scope返回相应的scopelist
+     * @return
+     */
+    public List<String> getScopeList(){
+        if(this.clientToScopes == null){
+            return Lists.newArrayList();
+        }else{
+            List<String> ret = Lists.newArrayList();
+            for(ClientToScope cs : this.clientToScopes){
+                if(cs.getResourceServerScope() != null){
+                    ret.add(cs.getResourceServerScope().getName());
+                }
+            }
+            return ret;
+        }
     }
 
     public void setClientToScopes(Set<ClientToScope> clientToScopes) {

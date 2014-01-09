@@ -3,7 +3,6 @@ package org.surfnet.oaaas.repository;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 import org.surfnet.oaaas.model.Client;
-import org.surfnet.oaaas.model.ResourceOwnerToAccessRestApi;
 import org.surfnet.oaaas.model.ResourceOwnerToScope;
 import org.surfnet.oaaas.model.ResourceServer;
 

@@ -1,5 +1,6 @@
 package com.netease.backend.bigdata.apis.controller;
 
+import com.google.common.base.Function;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -173,7 +174,12 @@ public class ClientAppController extends AbstractBaseController{
         updateOldClient(oldClient, client);
         client = clientRepository.save(oldClient);
         if(StringUtils.isNotEmpty(scopes)){
-            List<String> scopeIds = Lists.newArrayList(Splitter.on(",").split(scopes));
+            List<Long> scopeIds = Lists.transform(Lists.newArrayList(Splitter.on(",").split(scopes)), new Function<String, Long>() {
+                @Override
+                public Long apply( java.lang.String input) {
+                    return Long.valueOf(input);
+                }
+            });
             updateClientToScope(scopeIds, client);
         }
         redirectAttrs.addFlashAttribute(SUCCESS_MESSAGE,"保存成功");
@@ -186,13 +192,12 @@ public class ClientAppController extends AbstractBaseController{
      * @param scopeIds
      * @param client
      */
-    private void updateClientToScope(List<String> scopeIds, Client client) {
+    private void updateClientToScope(List<Long> scopeIds, Client client) {
         Set<ClientToScope> oldClientToScope = client.getClientToScopes();
-        for(String scopeIdStr : scopeIds) {
-            long id = Long.parseLong(scopeIdStr);
+        for(Long scopeId : scopeIds) {
             boolean isContains = false;
             for(ClientToScope cs : oldClientToScope){
-                if(cs.getResourceServerScope().getId().equals(id)){
+                if(cs.getResourceServerScope().getId().equals(scopeId)){
                     isContains = true;
                     break;
                 }
@@ -201,7 +206,7 @@ public class ClientAppController extends AbstractBaseController{
             if(!isContains){
                 ClientToScope clientToScope = new ClientToScope();
                 clientToScope.setClient(client);
-                clientToScope.setResourceServerScope(resourceServerScopeRepository.findOne(id));
+                clientToScope.setResourceServerScope(resourceServerScopeRepository.findOne(scopeId));
                 clientToScopeRepository.save(clientToScope);
             }
         }

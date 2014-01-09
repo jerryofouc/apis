@@ -19,10 +19,7 @@
 package org.surfnet.oaaas.consent;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -65,7 +62,7 @@ public class FormUserConsentHandler extends AbstractUserConsentHandler {
   @Override
   public void handleUserConsent(HttpServletRequest request, HttpServletResponse response, FilterChain chain,
       String authStateValue, String returnUri, Client client) throws IOException, ServletException {
-    if (isUserConsentPost(request)) {
+    if (isUserConsentPost(request)) { //是否是用户同意表单post
       if (processForm(request, response)) {
         chain.doFilter(request, response);
       }
@@ -84,24 +81,42 @@ public class FormUserConsentHandler extends AbstractUserConsentHandler {
     AuthenticatedPrincipal principal = (AuthenticatedPrincipal) request.getAttribute(AbstractAuthenticator.PRINCIPAL);
     ResourceOwner resourceOwner = (ResourceOwner)request.getSession().getAttribute(AbstractAuthenticator.RESOURCE_OWNER_KEY);
     List<AccessToken> tokens = accessTokenRepository.findByResourceOwnerAndClient(resourceOwner, client);
-    if (!CollectionUtils.isEmpty(tokens)) { //TODO 这个地方应该是对API的限制，还需要改正
+    if (!CollectionUtils.isEmpty(tokens)) {//TO后面再改
       // If another token is already present for this resource owner and client, no new consent should be requested
       List<String> grantedScopes = tokens.get(0).getScopes(); // take the scopes of the first access token found.
       setGrantedScopes(request, grantedScopes.toArray(new String[grantedScopes.size()]));
       chain.doFilter(request, response);
     } else {
-      AuthorizationRequest authorizationRequest = authorizationRequestRepository.findByAuthState(authStateValue);
-      List<AccessRestApi> apiList = resourceOwnerRepository.findAccessApisById(resourceOwner.getId());
-      request.setAttribute("apiList",apiList);
-    //  request.setAttribute("requestedScopes", authorizationRequest.getRequestedScopes());
-      request.setAttribute("client", client);
-      request.setAttribute(AUTH_STATE, authStateValue);
-      request.setAttribute("actionUri", returnUri);
-      request.getRequestDispatcher(getUserConsentUrl()).forward(request, response);
+        AuthorizationRequest authorizationRequest = authorizationRequestRepository.findByAuthState(authStateValue);
+        List<String> requestScopes = authorizationRequest.getRequestedScopes();
+        Set<ResourceOwnerToScope> resourceOwnerToScopes = resourceOwner.getResourceOwnerToScopes();
+        removeUnrequestScopes(requestScopes,resourceOwnerToScopes);
+        request.setAttribute("scopeList",resourceOwnerToScopes);
+        request.setAttribute("client", client);
+        request.setAttribute(AUTH_STATE, authStateValue);
+        request.setAttribute("actionUri", returnUri);
+        request.getRequestDispatcher(getUserConsentUrl()).forward(request, response);
     }
   }
 
-  /**
+    /**
+     * 删除没有request scope
+     * @param requestScopes
+     * @param resourceOwnerToScopes
+     */
+    private void removeUnrequestScopes(List<String> requestScopes, Set<ResourceOwnerToScope> resourceOwnerToScopes) {
+        Iterator<ResourceOwnerToScope> resourceOwnerToScopeIterator = resourceOwnerToScopes.iterator();
+        while(resourceOwnerToScopeIterator.hasNext()){
+            ResourceOwnerToScope resourceOwnerToScope = resourceOwnerToScopeIterator.next();
+            if(resourceOwnerToScope.getResourceServerScope()!=null){
+                if(!requestScopes.contains(resourceOwnerToScope.getResourceServerScope().getName())){
+                    resourceOwnerToScopeIterator.remove();
+                }
+            }
+        }
+    }
+
+    /**
    * 
    * Return the path to the User Consent page. Subclasses can use this hook by
    * providing a custom html/jsp.

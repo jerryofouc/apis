@@ -1,5 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -15,47 +16,71 @@
   <!--[if lt IE 9]>
   <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
   <![endif]-->
+    <style>
+        .app-thumbnail{
+            color: blue;
+            font-size: 20px;
+        }
+    </style>
 </head>
 <body>
 <div class="head">
-  <img src="${pageContext.request.contextPath}/client/img/surf-oauth.png"/>
+  <h2>Oauth 2</h2>
 </div>
 <div class="main">
   <div class="full">
 
 
     <div class="page-header">
-      <h1><strong>${client.name}</strong> wants to retrieve data
-        from <strong>${client.resourceServer.name}</strong></h1>
+      <h1>第三方应用<strong>${client.name}</strong> 希望访问应用 <strong>${client.resourceServer.name}</strong> 的Rest API</h1>
     </div>
 
     <div class="consent">
-      <img alt="${client.name}" title="${client.name}" src="${client.thumbNailUrl}" />
+        <span class="app-thumbnail">${client.name}</span>
       <img src="${pageContext.request.contextPath}/client/img/arrow.png" />
-      <img alt="${client.resourceServer.name}"
-        title="${client.resourceServer.name}"
-        src="${client.resourceServer.thumbNailUrl}" />
+        <span class="app-thumbnail">${client.resourceServer.name}</span>
     </div>
 
     <form id="accept" method="post" action="${pageContext.request.contextPath}${actionUri}">
       <input type="hidden" name="AUTH_STATE" value="${AUTH_STATE}"/>
-
-      <h2>您可以选择一下的api被开放</h2>
-
+      <h2>您可以授权以下scope的openapi</h2>
       <fieldset>
-          <c:forEach var="api" items="${apiList}">
-              <input type="checkbox" id="GRANTED_APIS" name="GRANTED_APIS"
-                     value="${api.id}"/>
-              <span class="consent-label">${api.completeUrl}</span><br/>
+          <c:forEach var="scope" items="${scopeList}">
+              <table class="table table-bordered " style="width: 50%">
+                  <thead>
+                    <tr>
+                     <th></th>
+                     <th>scope</th>
+                     <th>API 列表</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                  <c:forEach var="api" items="${scope.accessRestApis}" varStatus="status">
+                    <tr>
+                        <c:if test="${status.first}">
+                            <td rowspan="${fn:length(scope.accessRestApis)}">
+                                <input type="checkbox" checked="true" id="GRANTED_APIS" name="GRANTED_APIS" value="${scope.resourceServerScope.id}"/>
+                            </td>
+                            <td rowspan="${fn:length(scope.accessRestApis)}">
+                                    ${scope.resourceServerScope.name}
+                            </td>
+                        </c:if>
+                            <td>
+                                ${api.completeUrl}
+                            </td>
+                    </tr>
+                  </c:forEach>
+                  </tbody>
+              </table>
           </c:forEach>
       </fieldset>
       <fieldset>
         <div class="form-actions">
           <button id="user_oauth_approval" name="user_oauth_approval" value="true" type="submit"
-                  class="btn btn-success">Grant permission</button>
+                  class="btn btn-success">授权</button>
           &nbsp;&nbsp;&nbsp;<em>or</em>&nbsp;&nbsp;&nbsp;
           <button type="submit" name="user_oauth_approval" value="false"
-                  class="btn btn-danger">Deny permission</button>
+                  class="btn btn-danger">拒绝授权</button>
         </div>
       </fieldset>
     </form>
@@ -63,7 +88,7 @@
 </div>
 
 <div class="foot">
-  <p>Powered by <a href="http://www.surfnet.nl/">SURFnet</a>. Fork me on <a href="https://github.com/OpenConextApps/oa-aas/">Github</a>. Licensed under the <a href="http://www.apache.org/licenses/LICENSE-2.0">Apache License 2.0</a>.</p>
+  <p>Powered by 后台技术部大数据技术组 2014</p>
 </div>
 </body>
 </html>

@@ -19,14 +19,17 @@
 package org.surfnet.oaaas.model;
 
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.*;
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.*;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.SerializationUtils;
 import org.apache.commons.lang.StringUtils;
+import org.codehaus.jackson.annotate.JsonIgnore;
 import org.springframework.util.Assert;
 import org.surfnet.oaaas.auth.principal.AuthenticatedPrincipal;
 
@@ -225,4 +228,5 @@ public class AccessToken extends AbstractEntity {
     public void setResourceOwner(ResourceOwner resourceOwner) {
         this.resourceOwner = resourceOwner;
     }
+
 }

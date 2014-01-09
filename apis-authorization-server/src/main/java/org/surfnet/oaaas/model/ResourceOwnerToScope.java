@@ -1,12 +1,15 @@
 package org.surfnet.oaaas.model;
 
+import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonProperty;
 
 import javax.persistence.*;
+import javax.validation.Valid;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
+import java.util.Set;
 
 /**
  * ResourceOwner和ResourceServerScope的中间表
@@ -36,6 +39,20 @@ public class ResourceOwnerToScope {
     @JoinColumn(name = "scope_id", nullable = false)
     @XmlTransient
     private ResourceServerScope resourceServerScope;
+
+    @JsonIgnore
+    @OneToMany(fetch = FetchType.EAGER, cascade = {CascadeType.ALL}, orphanRemoval = true)
+    @JoinColumn(name = "resourceowner_to_scope_id", nullable = false)
+    @Valid
+    private Set<AccessRestApi> accessRestApis;
+
+    public Set<AccessRestApi> getAccessRestApis() {
+        return accessRestApis;
+    }
+
+    public void setAccessRestApis(Set<AccessRestApi> accessRestApis) {
+        this.accessRestApis = accessRestApis;
+    }
 
     public Long getId() {
         return id;

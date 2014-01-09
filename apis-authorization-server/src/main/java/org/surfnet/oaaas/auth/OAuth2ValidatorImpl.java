@@ -27,6 +27,7 @@ import org.apache.commons.lang.StringUtils;
 import org.surfnet.oaaas.model.AccessTokenRequest;
 import org.surfnet.oaaas.model.AuthorizationRequest;
 import org.surfnet.oaaas.model.Client;
+import org.surfnet.oaaas.model.ResourceServerScope;
 import org.surfnet.oaaas.repository.ClientRepository;
 
 import static org.surfnet.oaaas.auth.OAuth2Validator.ValidationResponse.*;
@@ -59,12 +60,12 @@ public class OAuth2ValidatorImpl implements OAuth2Validator {
     try {
       validateAuthorizationRequest(authorizationRequest);
 
-      String responseType = validateResponseType(authorizationRequest);
+      String responseType = validateResponseType(authorizationRequest); //验证responseType ,错误返回什么？
 
-      Client client = validateClient(authorizationRequest);
+      Client client = validateClient(authorizationRequest); //验证client的正确性，首先导数据库查找是否存在，如果是implicit grant验证是否允许这种认证方式。
       authorizationRequest.setClient(client);
 
-      String redirectUri = determineRedirectUri(authorizationRequest, responseType, client);
+      String redirectUri = determineRedirectUri(authorizationRequest, responseType, client); //验证是否有该redirectURI
       authorizationRequest.setRedirectUri(redirectUri);
 
       List<String> scopes = determineScopes(authorizationRequest, client);
@@ -82,12 +83,12 @@ public class OAuth2ValidatorImpl implements OAuth2Validator {
       return null;
     } else {
       List<String> scopes = authorizationRequest.getRequestedScopes();
-   //   List<String> clientScopes = client.getScopes();
-//      for (String scope : scopes) {
-//        if (!clientScopes.contains(scope)) {
-//          throw new ValidationResponseException(SCOPE_NOT_VALID);
-//        }
-//      }
+      List<String> clientScopes = client.getScopeList();
+        for (String scope : scopes) {
+        if (!clientScopes.contains(scope)) {
+          throw new ValidationResponseException(SCOPE_NOT_VALID);
+        }
+      }
       return authorizationRequest.getRequestedScopes();
     }
   }

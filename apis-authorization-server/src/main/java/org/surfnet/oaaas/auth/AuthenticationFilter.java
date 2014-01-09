@@ -66,7 +66,7 @@ public class AuthenticationFilter implements Filter {
     AuthorizationRequest authorizationRequest = extractAuthorizationRequest(request);
     final ValidationResponse validationResponse = oAuth2Validator.validate(authorizationRequest);
 
-    if (authenticator.canCommence(request)) {
+    if (authenticator.canCommence(request)) {//如果验证成功，则
       /*
       * Ok, the authenticator wants to have control again (because he stepped
       * out)
@@ -76,7 +76,7 @@ public class AuthenticationFilter implements Filter {
       // Request contains correct parameters to be a real OAuth2 request.
       handleInitialRequest(authorizationRequest, request);
       authenticator.doFilter(request, response, chain);
-    } else {
+    } else { //根据定义的错误码，将错误暴露出来
       // not an initial request but authentication module cannot handle it either
       sendError(response, authorizationRequest, validationResponse);
     }

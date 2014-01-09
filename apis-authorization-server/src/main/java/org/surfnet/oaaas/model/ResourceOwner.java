@@ -39,6 +39,20 @@ public class ResourceOwner extends AbstractEntity{
     @Valid
     private Set<AccessToken> accessTokens;
 
+    @JsonIgnore
+    @OneToMany(fetch = FetchType.EAGER, cascade = {CascadeType.ALL}, orphanRemoval = true)
+    @JoinColumn(name = "resourceowner_id", nullable = false)
+    @Valid
+    private Set<ResourceOwnerToScope> resourceOwnerToScopes;
+
+    public Set<ResourceOwnerToScope> getResourceOwnerToScopes() {
+        return resourceOwnerToScopes;
+    }
+
+    public void setResourceOwnerToScopes(Set<ResourceOwnerToScope> resourceOwnerToScopes) {
+        this.resourceOwnerToScopes = resourceOwnerToScopes;
+    }
+
     public String getName() {
         return name;
     }

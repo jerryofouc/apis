@@ -9,33 +9,31 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
 /**
- * token和rest api的中间表
+ * ResourceOwnerToScope和AccessToken多对多的中间表
  * User: zhangxiaojie
- * Date: 12/30/13
- * Time: 21:46
+ * Date: 1/9/14
+ * Time: 11:49
  * To change this template use File | Settings | File Templates.
  */
-
-
 @SuppressWarnings("serial")
 @Entity
-@Table(name = "ACCESSTOKEN_TO_ACCESSRESTAPI")
+@Table(name = "RESOURCEOWNERTOSCOPE_TO_ACCESSTOKEN")
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement
-public class AccessTokenToAccessRestApi {
+public class ResourceOwnerScopeToAccessToken {
     @Id
     @GeneratedValue
     @JsonProperty
     private Long id;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "access_rest_api_id", nullable = false, updatable = false)
+    @JoinColumn(name = "ro_to_scope_id", nullable = false)
     @XmlTransient
-    private AccessRestApi accessRestApi;
+    private ResourceOwnerToScope resourceOwnerToScope;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "accesstoken_id", nullable = false, updatable = false)
+    @JoinColumn(name = "access_token_id", nullable = false)
     @XmlTransient
     private AccessToken accessToken;
 
@@ -47,12 +45,12 @@ public class AccessTokenToAccessRestApi {
         this.id = id;
     }
 
-    public AccessRestApi getAccessRestApi() {
-        return accessRestApi;
+    public ResourceOwnerToScope getResourceOwnerToScope() {
+        return resourceOwnerToScope;
     }
 
-    public void setAccessRestApi(AccessRestApi accessRestApi) {
-        this.accessRestApi = accessRestApi;
+    public void setResourceOwnerToScope(ResourceOwnerToScope resourceOwnerToScope) {
+        this.resourceOwnerToScope = resourceOwnerToScope;
     }
 
     public AccessToken getAccessToken() {

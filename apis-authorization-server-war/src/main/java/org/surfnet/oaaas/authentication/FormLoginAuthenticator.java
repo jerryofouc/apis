@@ -36,6 +36,7 @@ import org.surfnet.oaaas.auth.AbstractAuthenticator;
 import org.surfnet.oaaas.auth.principal.AuthenticatedPrincipal;
 import org.surfnet.oaaas.model.AccessRestApi;
 import org.surfnet.oaaas.model.ResourceOwner;
+import org.surfnet.oaaas.model.ResourceOwnerToScope;
 import org.surfnet.oaaas.repository.ResourceOwnerRepository;
 
 /**
@@ -65,7 +66,7 @@ public class FormLoginAuthenticator extends AbstractAuthenticator {
     AuthenticatedPrincipal principal = (AuthenticatedPrincipal) (session != null ? session
         .getAttribute(SESSION_IDENTIFIER) : null);
     if (request.getMethod().equals("POST")) {
-      if(hasPermission(request,response)){
+      if(hasPermission(request,response)){//验证是否有权限
           processForm(request);
           chain.doFilter(request, response);
       }
@@ -93,8 +94,9 @@ public class FormLoginAuthenticator extends AbstractAuthenticator {
                 request.getRequestDispatcher("/WEB-INF/error/403.jsp").forward(request,response);
                 return false;
             }
-            List<AccessRestApi> accessRestApiSet =  resourceOwnerRepository.findAccessApisById(resourceOwner.getId());
-            if(accessRestApiSet == null || accessRestApiSet.isEmpty()){//访问api为空
+
+            Set<ResourceOwnerToScope> resourceOwnerToScopes = resourceOwner.getResourceOwnerToScopes();
+            if(resourceOwnerToScopes == null || resourceOwnerToScopes.isEmpty()){//访问api为空
                 request.getRequestDispatcher("/WEB-INF/error/403.jsp").forward(request,response);
                 return false;
             }

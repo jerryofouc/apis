@@ -85,7 +85,7 @@
     <tomcat-jdbc.version>7.0.29</tomcat-jdbc.version>
     <spring.version>3.2.1.RELEASE</spring.version>
     <spring-security.version>3.2.1.RELEASE</spring-security.version>
-    <openjpa.version>2.2.0</openjpa.version>
+    <openjpa.version>2.3.0</openjpa.version>
     <commons-lang.version>2.6</commons-lang.version>
     <commons-io.version>2.0.1</commons-io.version>
     <jersey.version>1.12</jersey.version>
