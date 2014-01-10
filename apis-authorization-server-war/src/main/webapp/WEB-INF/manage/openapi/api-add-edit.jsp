@@ -63,7 +63,7 @@
                             <label class="control-label">API url</label>
                             <div class="controls">
                                 <input class="input-xlarge focused" name="completeUrl" placeholder="http://johndoe.com" required pattern="(http|https)://.+"  type="text" >
-                                <span class="help-inline">可以使用通配符来表示</span>
+                                <span class="help-inline">请使用正在表达式来表示相应的api</span>
                             </div>
                         </div>
                         <div class="control-group">

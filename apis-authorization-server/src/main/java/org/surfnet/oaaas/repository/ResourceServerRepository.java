@@ -29,5 +29,5 @@ public interface ResourceServerRepository extends CrudRepository<ResourceServer,
 
   ResourceServer findByIdAndOwner(Long id, String owner);
 
-  ResourceServer findByKey(String key);
+  ResourceServer findByKeyAndSecret(String key,String secret);
 }

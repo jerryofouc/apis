@@ -25,6 +25,8 @@ import com.yammer.dropwizard.Service;
 import com.yammer.dropwizard.auth.oauth.OAuthProvider;
 import com.yammer.dropwizard.config.Environment;
 
+import java.io.File;
+
 /**
  * Main entry
  *
@@ -36,8 +38,9 @@ public class UniversityFooService extends Service<UniversityFooConfiguration> {
    */
   public static void main(String[] args) throws Exception {
     if (args == null || args.length != 2) {
-      args = new String[] { "server", "university-foo-local.yml" };
+      args = new String[] { "server", "apis-example-resource-server/university-foo-local.yml" };
     }
+      System.out.println(new File(".").getAbsolutePath());
     new UniversityFooService().run(args);
   }
 

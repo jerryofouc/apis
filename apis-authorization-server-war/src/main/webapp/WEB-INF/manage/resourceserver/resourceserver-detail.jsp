@@ -42,6 +42,10 @@
                         <td>${resourceServer.serverURL}</td>
                     </tr>
                     <tr>
+                        <td><strong>服务器id（系统生成的用于认证）</strong></td>
+                        <td>${resourceServer.key}</td>
+                    </tr>
+                    <tr>
                         <td><strong>创建时间</strong></td>
                         <td><fmt:formatDate value="${resourceServer.creationDate}" pattern="yyyy-MM-dd HH:mm" /></td>
                     </tr>

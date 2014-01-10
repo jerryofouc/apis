@@ -25,9 +25,7 @@ import org.springframework.context.EnvironmentAware;
 import org.springframework.core.env.Environment;
 import org.surfnet.oaaas.auth.ObjectMapperProvider;
 import org.surfnet.oaaas.auth.principal.UserPassCredentials;
-import org.surfnet.oaaas.model.AccessToken;
-import org.surfnet.oaaas.model.ResourceServer;
-import org.surfnet.oaaas.model.VerifyTokenResponse;
+import org.surfnet.oaaas.model.*;
 import org.surfnet.oaaas.repository.AccessTokenRepository;
 import org.surfnet.oaaas.repository.ResourceServerRepository;
 
@@ -39,6 +37,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import java.io.IOException;
+import java.util.Set;
 
 import static org.surfnet.oaaas.resource.TokenResource.BASIC_REALM;
 import static org.surfnet.oaaas.resource.TokenResource.WWW_AUTHENTICATE;
@@ -56,93 +55,139 @@ import static org.surfnet.oaaas.resource.TokenResource.WWW_AUTHENTICATE;
 @Produces(MediaType.APPLICATION_JSON)
 public class VerifyResource implements EnvironmentAware {
 
-  private static final Logger LOG = LoggerFactory.getLogger(VerifyResource.class);
+    private static final Logger LOG = LoggerFactory.getLogger(VerifyResource.class);
 
-  private static final ObjectMapper mapper = new ObjectMapperProvider().getContext(ObjectMapper.class);
+    private static final ObjectMapper mapper = new ObjectMapperProvider().getContext(ObjectMapper.class);
 
-  @Inject
-  private AccessTokenRepository accessTokenRepository;
+    @Inject
+    private AccessTokenRepository accessTokenRepository;
 
-  @Inject
-  private ResourceServerRepository resourceServerRepository;
+    @Inject
+    private ResourceServerRepository resourceServerRepository;
 
-  private boolean jsonTypeInfoIncluded;
+    private boolean jsonTypeInfoIncluded;
 
-  @GET
-  public Response verifyToken(@HeaderParam(HttpHeaders.AUTHORIZATION)
-                              String authorization, @QueryParam("access_token")
-                              String accessToken) throws IOException {
+    /**
+     *
+     * @param authorization 认证消息
+     * @param accessToken  accessToken
+     * @param accessURL   要访问的URL
+     * @return
+     * @throws IOException
+     */
+    @GET
+    public Response verifyToken(@HeaderParam(HttpHeaders.AUTHORIZATION)
+                                String authorization, @QueryParam("access_token")
+                                String accessToken, @QueryParam("accessURL") String accessURL) throws IOException {
 
-    UserPassCredentials credentials = new UserPassCredentials(authorization);
+        UserPassCredentials credentials = new UserPassCredentials(authorization);
 
-    if (LOG.isDebugEnabled()) {
-      LOG.debug("Incoming verify-token request, access token: {}, credentials from authorization header: {}", accessToken, credentials);
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Incoming verify-token request, access token: {}, credentials from authorization header: {}", accessToken, credentials);
+        }
+
+        //验证是否存在该resource server
+        ResourceServer resourceServer = getResourceServer(credentials);
+        if (resourceServer == null/** || !resourceServer.getSecret().equals(credentials.getPassword())**/) {
+            LOG.warn("For access token {}: Resource server not found for credentials {}. Responding with 401 in VerifyResource#verifyToken.", accessToken, credentials);
+            return unauthorized();
+        }
+
+        //是否存在该token
+        AccessToken token = accessTokenRepository.findByToken(accessToken);
+        if (token == null || !resourceServer.containsClient(token.getClient())) {
+            LOG.warn("Access token {} not found for resource server '{}'. Responding with 404 in VerifyResource#verifyToken for user {}", accessToken, resourceServer.getName(), credentials);
+            return Response.status(Status.NOT_FOUND).entity(new VerifyTokenResponse("not_found")).build();
+        }
+
+        //token是否过期
+        if (tokenExpired(token)) {
+            LOG.warn("Token {} is expired. Responding with 410 in VerifyResource#verifyToken for user {}", accessToken, credentials);
+            return Response.status(Status.GONE).entity(new VerifyTokenResponse("token_expired")).build();
+        }
+
+        if(!isTokenContainsAccessURL(token, accessURL)){
+            LOG.warn("Token {} is match the url. Responding with 410 in VerifyResource#verifyToken for user {}", accessToken, credentials);
+            return Response.status(Status.FORBIDDEN).entity(new VerifyTokenResponse("token_not_match_this_url")).build();
+
+        }
+
+
+        final VerifyTokenResponse verifyTokenResponse = new VerifyTokenResponse(token.getClient().getName(),
+                token.getScopes(), token.getPrincipal(), token.getExpires());
+
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Responding with 200 in VerifyResource#verifyToken for access token {} and user {}", accessToken, credentials);
+        }
+        return Response.ok(mapper.writeValueAsString(verifyTokenResponse)).build();
     }
 
-    ResourceServer resourceServer = getResourceServer(credentials);
-    if (resourceServer == null/** || !resourceServer.getSecret().equals(credentials.getPassword())**/) {
-      LOG.warn("For access token {}: Resource server not found for credentials {}. Responding with 401 in VerifyResource#verifyToken.", accessToken, credentials);
-      return unauthorized();
+    /**
+     * token是否包含要访问的URL
+     * @param token
+     * @param accessURL
+     * @return
+     */
+    private boolean isTokenContainsAccessURL(AccessToken token, String accessURL) {
+        Set<ResourceOwnerScopeToAccessToken> resourceOwnerScopeToAccessTokenSet = token.getResourceOwnerScopeToAccessTokens();
+        boolean isContains = false;
+        if(resourceOwnerScopeToAccessTokenSet != null){
+            for(ResourceOwnerScopeToAccessToken resourceOwnerScopeToAccessToken : resourceOwnerScopeToAccessTokenSet){
+                ResourceOwnerToScope resourceOwnerToScope  = resourceOwnerScopeToAccessToken.getResourceOwnerToScope();
+                Set<AccessRestApi> accessRestApis = null;
+                if(resourceOwnerToScope != null && (accessRestApis = resourceOwnerToScope.getAccessRestApis()) != null){
+                    for(AccessRestApi accessRestApi : accessRestApis){
+                        if(accessRestApi.getCompleteUrl() != null && accessURL.matches(accessRestApi.getCompleteUrl())){
+                            isContains = true;
+                            return isContains;
+                        }
+                    } //end of accessRestApis
+                } //endof for if
+            } //endof for  resourceOwnerScopeToAccessTokenSet
+        }//endof if
+
+        return isContains;
     }
 
-    AccessToken token = accessTokenRepository.findByToken(accessToken);
-    if (token == null || !resourceServer.containsClient(token.getClient())) {
-      LOG.warn("Access token {} not found for resource server '{}'. Responding with 404 in VerifyResource#verifyToken for user {}", accessToken, resourceServer.getName(), credentials);
-      return Response.status(Status.NOT_FOUND).entity(new VerifyTokenResponse("not_found")).build();
-    }
-    if (tokenExpired(token)) {
-      LOG.warn("Token {} is expired. Responding with 410 in VerifyResource#verifyToken for user {}", accessToken, credentials);
-      return Response.status(Status.GONE).entity(new VerifyTokenResponse("token_expired")).build();
+    private boolean tokenExpired(AccessToken token) {
+        return token.getExpires() != 0 && token.getExpires() < System.currentTimeMillis();
     }
 
-    final VerifyTokenResponse verifyTokenResponse = new VerifyTokenResponse(token.getClient().getName(),
-            token.getScopes(), token.getPrincipal(), token.getExpires());
-
-    if (LOG.isDebugEnabled()) {
-      LOG.debug("Responding with 200 in VerifyResource#verifyToken for access token {} and user {}", accessToken, credentials);
+    private ResourceServer getResourceServer(UserPassCredentials credentials) {
+        String key = credentials.getUsername();
+        return resourceServerRepository.findByKeyAndSecret(key,credentials.getPassword());
     }
-    return Response.ok(mapper.writeValueAsString(verifyTokenResponse)).build();
-  }
 
-  private boolean tokenExpired(AccessToken token) {
-    return token.getExpires() != 0 && token.getExpires() < System.currentTimeMillis();
-  }
-
-  private ResourceServer getResourceServer(UserPassCredentials credentials) {
-    String key = credentials.getUsername();
-    return resourceServerRepository.findByKey(key);
-  }
-
-  protected Response unauthorized() {
-    return Response.status(Status.UNAUTHORIZED).header(WWW_AUTHENTICATE, BASIC_REALM).build();
-  }
-
-  /**
-   * @param accessTokenRepository the accessTokenRepository to set
-   */
-  public void setAccessTokenRepository(AccessTokenRepository accessTokenRepository) {
-    this.accessTokenRepository = accessTokenRepository;
-  }
-
-  /**
-   * @param resourceServerRepository the resourceServerRepository to set
-   */
-  public void setResourceServerRepository(ResourceServerRepository resourceServerRepository) {
-    this.resourceServerRepository = resourceServerRepository;
-  }
-
-  @Override
-  public void setEnvironment(Environment environment) {
-    jsonTypeInfoIncluded = Boolean.valueOf(environment.getProperty("adminService.jsonTypeInfoIncluded", "false"));
-    if (jsonTypeInfoIncluded) {
-      mapper.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL);
-    } else {
-      mapper.disableDefaultTyping();
+    protected Response unauthorized() {
+        return Response.status(Status.UNAUTHORIZED).header(WWW_AUTHENTICATE, BASIC_REALM).build();
     }
-  }
 
-  public boolean isJsonTypeInfoIncluded() {
-    return jsonTypeInfoIncluded;
-  }
+    /**
+     * @param accessTokenRepository the accessTokenRepository to set
+     */
+    public void setAccessTokenRepository(AccessTokenRepository accessTokenRepository) {
+        this.accessTokenRepository = accessTokenRepository;
+    }
+
+    /**
+     * @param resourceServerRepository the resourceServerRepository to set
+     */
+    public void setResourceServerRepository(ResourceServerRepository resourceServerRepository) {
+        this.resourceServerRepository = resourceServerRepository;
+    }
+
+    @Override
+    public void setEnvironment(Environment environment) {
+        jsonTypeInfoIncluded = Boolean.valueOf(environment.getProperty("adminService.jsonTypeInfoIncluded", "false"));
+        if (jsonTypeInfoIncluded) {
+            mapper.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL);
+        } else {
+            mapper.disableDefaultTyping();
+        }
+    }
+
+    public boolean isJsonTypeInfoIncluded() {
+        return jsonTypeInfoIncluded;
+    }
 
 }
