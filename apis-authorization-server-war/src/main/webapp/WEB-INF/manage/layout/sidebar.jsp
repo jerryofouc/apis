@@ -16,7 +16,7 @@
             <a href="${ctx}/manage/api"><i class="icon-chevron-right"></i>OpenApi 管理</a>
         </li>
         <li id="li-accesstoken">
-            <a href="${ctx}/manage/api"><i class="icon-chevron-right"></i>AccessToken 管理</a>
+            <a href="${ctx}/manage/accessToken"><i class="icon-chevron-right"></i>AccessToken 管理</a>
         </li>
     </ul>
 </div>

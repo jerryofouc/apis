@@ -40,6 +40,11 @@ public class SpringMVCConfiguration extends WebMvcConfigurerAdapter {
     }
 
     @Bean
+    public AccessTokenController  accessTokenController(){
+        return new AccessTokenController();
+    }
+
+    @Bean
     public ClientAppController clientAppController(){
         return new ClientAppController();
     }
