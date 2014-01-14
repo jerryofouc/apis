@@ -44,13 +44,21 @@ public class AccessTokenController extends  AbstractBaseController{
         AccessToken accessToken = accessTokenRepository.findOne(id);
         if(accessToken == null){
             redirectAttrs.addFlashAttribute(FAIL_MESSAGE, "该AccessToken不存在");
-            return "redirect:/manage/resourceServer";
+            return "redirect:/manage/accessToken";
         }else{
             model.addAttribute("accessToken", accessToken);
             return "accesstoken/accesstoken-detail";
         }
     }
 
-
-
+    @RequestMapping(value = "delete/{id}",method = RequestMethod.GET)
+    public String delete(@PathVariable(value = "id") Long id,RedirectAttributes redirectAttrs){
+        if(accessTokenRepository.findOne(id) != null){
+            accessTokenRepository.delete(id);
+            redirectAttrs.addFlashAttribute(SUCCESS_MESSAGE,"删除成功");
+        }else{
+            redirectAttrs.addFlashAttribute(FAIL_MESSAGE,"该AccessToken不存在");
+        }
+        return "redirect:/manage/accessToken";
+    }
 }
