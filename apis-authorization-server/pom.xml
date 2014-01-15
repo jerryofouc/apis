@@ -11,9 +11,9 @@
 
   <parent>
     <relativePath>../pom.xml</relativePath>
-    <groupId>nl.surfnet.apis</groupId>
+    <groupId>com.netease.backend.bigdata</groupId>
     <artifactId>apis-parent</artifactId>
-    <version>1.3.4</version>
+    <version>1.0.0-SNAPSHOT</version>
   </parent>
 
   <artifactId>apis-authorization-server</artifactId>
@@ -22,7 +22,7 @@
 
   <dependencies>
     <dependency>
-      <groupId>nl.surfnet.apis</groupId>
+      <groupId>com.netease.backend.bigdata</groupId>
       <artifactId>apis-resource-server-library</artifactId>
     </dependency>
     <dependency>
