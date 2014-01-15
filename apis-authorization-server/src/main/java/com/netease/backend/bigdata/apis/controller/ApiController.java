@@ -43,8 +43,8 @@ public class ApiController extends AbstractBaseController{
 
     @RequestMapping(value = "", method = RequestMethod.GET)
     public String list(Model model){
-        List<AccessRestApi> accessRestApiList = Lists.newArrayList(accessRestApiRepository.findAll());
-        model.addAttribute("accessRestApiList",accessRestApiList);
+        List<ResourceOwnerToScope> resourceOwnerToScopes = Lists.newArrayList(resourceOwnerToScopeRepository.findAll());
+        model.addAttribute("resourceOwnerToScopes",resourceOwnerToScopes);
         return "openapi/api-list";
     }
 

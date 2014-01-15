@@ -1,6 +1,7 @@
 <%@ page language="java" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <c:set var="ctx" value="${pageContext.request.contextPath}"/>
 <html>
 <head>
@@ -51,7 +52,7 @@
         </div>
         <div class="block-content collapse in">
             <div class="span12">
-                <table class="table">
+                <table class="table table-bordered">
                     <thead>
                     <tr>
                         <th>编号</th>
@@ -63,17 +64,21 @@
                     </tr>
                     </thead>
                     <tbody>
-                    <c:forEach items="${accessRestApiList}" var="api" varStatus="status">
-                        <tr>
-                            <td>${status.index}</td>
-                            <td>${api.resourceOwner.name}</td>
-                            <td>${api.resourceServer.name}</td>
-                            <td>${api.resourceOwnerToScope.resourceServerScope.name}</td>
-                            <td>${api.completeUrl}</td>
-                            <td>
-                                <button class="btn btn-danger btn-mini" onclick="location.href='${ctx}/manage/api/delete/${api.id}'"><i class="icon-remove icon-white"></i> 删除</button>
-                            </td>
-                        </tr>
+                    <c:forEach items="${resourceOwnerToScopes}" var="scope" varStatus="status">
+                        <c:forEach var="api" items="${scope.accessRestApis}" varStatus="apiStatus">
+                            <tr>
+                                <c:if test="${apiStatus.first}">
+                                    <td rowspan="${fn:length(scope.accessRestApis)}">${status.index}</td>
+                                    <td rowspan="${fn:length(scope.accessRestApis)}">${scope.resourceOwner.name}</td>
+                                    <td rowspan="${fn:length(scope.accessRestApis)}">${scope.resourceServerScope.resourceServer.name}</td>
+                                    <td rowspan="${fn:length(scope.accessRestApis)}">${scope.resourceServerScope.name}</td>
+                                </c:if>
+                                <td>${api.completeUrl}</td>
+                                <td>
+                                    <button class="btn btn-danger btn-mini" onclick="location.href='${ctx}/manage/api/delete/${api.id}'"><i class="icon-remove icon-white"></i> 删除</button>
+                                </td>
+                            </tr>
+                        </c:forEach>
                     </c:forEach>
                     </tbody>
                 </table>

@@ -46,6 +46,13 @@
                         <td>${resourceServer.key}</td>
                     </tr>
                     <tr>
+                        <td>scopes</td>
+                        <td>
+                         <c:forEach var="scope" items="${resourceServer.resourceServerScopes}" varStatus="status">
+                           ${scope.name} <c:out value="${status.last?'':','}"></c:out>
+                        </c:forEach></td>
+                    </tr>
+                    <tr>
                         <td><strong>创建时间</strong></td>
                         <td><fmt:formatDate value="${resourceServer.creationDate}" pattern="yyyy-MM-dd HH:mm" /></td>
                     </tr>

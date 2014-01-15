@@ -25,9 +25,12 @@ import org.surfnet.oaaas.model.ResourceServer;
 @Repository
 public interface ResourceServerRepository extends CrudRepository<ResourceServer, Long> {
 
-  List<ResourceServer> findByOwner(String owner);
+    List<ResourceServer> findByOwner(String owner);
 
-  ResourceServer findByIdAndOwner(Long id, String owner);
+    ResourceServer findByIdAndOwner(Long id, String owner);
 
-  ResourceServer findByKeyAndSecret(String key,String secret);
+    ResourceServer findByKeyAndSecret(String key, String secret);
+
+    ResourceServer findByKey(String key);
+
 }

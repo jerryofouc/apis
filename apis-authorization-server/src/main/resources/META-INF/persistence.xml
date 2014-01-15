@@ -19,6 +19,10 @@
   <persistence-unit name="oaaas">
     <properties>
       <property name="openjpa.Log" value="slf4j" />
+        <property name="openjpa.Optimistic" value="true"/>
+        <property name="openjpa.jdbc.TransactionIsolation" value="serializable"/>
+        <property name="openjpa.DataCache" value="false"/>
+        <property name="openjpa.QueryCache" value="false"/>
     </properties>
   </persistence-unit>
 </persistence>
