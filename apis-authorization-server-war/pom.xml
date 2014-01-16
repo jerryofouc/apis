@@ -283,7 +283,7 @@
             <contextHandler implementation="org.eclipse.jetty.webapp.WebAppContext">
               <contextPath>/openconext-mock</contextPath>
               <war>
-                ${settings.localRepository}/nl/surfnet/apis/apis-openconext-mock-war/${project.version}/apis-openconext-mock-war-${project.version}.war
+                ${settings.localRepository}/com/netease/backend/bigdata/apis-openconext-mock-war/${project.version}/apis-openconext-mock-war-${project.version}.war
               </war>
               <extraClasspath>${basedir}/src/test/resources/</extraClasspath>
             </contextHandler>

@@ -4,7 +4,6 @@ import com.google.common.collect.Maps;
 import com.netease.backend.bigdata.apis.dto.Oauth2APIDto;
 import com.sun.jersey.api.client.ClientResponse;
 import org.apache.commons.lang.StringUtils;
-import org.springframework.http.HttpStatus;
 import org.surfnet.oaaas.model.*;
 import org.surfnet.oaaas.repository.*;
 
@@ -19,11 +18,11 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Created with IntelliJ IDEA.
+ * 提供给外部系统的调用rest api调用类
  * User: zhangxiaojie
  * Date: 1/14/14
  * Time: 15:38
- * To change this template use File | Settings | File Templates.
+ *
  */
 /**
  *将服务开放出去供别的系统进行调用
@@ -95,22 +94,7 @@ public class OpenAPIResource {
             resourceOwnerRepository.save(resourceOwner);
         }
 
-        Set<ResourceOwnerToScope> oldResourceOwnerToScopes = resourceOwner.getResourceOwnerToScopes();
-        //如果又申请一次，则先删除再进行更新
-        if(oldResourceOwnerToScopes != null ){
-            for(ResourceOwnerToScope resourceOwnerToScope : oldResourceOwnerToScopes){
-                for(AccessRestApi accessRestApi:resourceOwnerToScope.getAccessRestApis()){
-                    accessRestApiRepository.delete(accessRestApi);
-                }
-                resourceOwnerToScope.setAccessRestApis(null);//这一步必须这么删，要不然会报异常
-            }
-        }
-
-        if(oldResourceOwnerToScopes != null ){
-            for(ResourceOwnerToScope resourceOwnerToScope : oldResourceOwnerToScopes){
-                resourceOwnerToScopeRepository.delete(resourceOwnerToScope.getId());
-            }
-        }
+        deleteAllResourceOwnerScopes(resourceOwner,resourceServer);
 
 
 
@@ -135,6 +119,55 @@ public class OpenAPIResource {
 
         return Response.status(Response.Status.CREATED).build();
     }
+
+    private void deleteAllResourceOwnerScopes(ResourceOwner resourceOwner, ResourceServer resourceServer) {
+        Set<ResourceOwnerToScope> oldResourceOwnerToScopes = resourceOwner.getResourceOwnerToScopes();
+        //如果又申请一次，则先删除再进行更新
+        if(oldResourceOwnerToScopes != null ){
+            for(ResourceOwnerToScope resourceOwnerToScope : oldResourceOwnerToScopes){
+                if(resourceOwnerToScope.getResourceServerScope() != null && resourceOwnerToScope.getResourceServerScope().getResourceServer()!=null
+                    && StringUtils.isNotEmpty(resourceOwnerToScope.getResourceServerScope().getResourceServer().getKey())
+                        &&resourceOwnerToScope.getResourceServerScope().getResourceServer().getKey().equals(resourceServer.getKey())){
+                    for(AccessRestApi accessRestApi:resourceOwnerToScope.getAccessRestApis()){
+                        accessRestApiRepository.delete(accessRestApi);
+                    }
+                    resourceOwnerToScope.setAccessRestApis(null);//这一步必须这么删，要不然会报异常
+                }
+            }
+        }
+            if(oldResourceOwnerToScopes != null ){
+            for(ResourceOwnerToScope resourceOwnerToScope : oldResourceOwnerToScopes){
+                if(resourceOwnerToScope.getResourceServerScope() != null && resourceOwnerToScope.getResourceServerScope().getResourceServer()!=null
+                        && StringUtils.isNotEmpty(resourceOwnerToScope.getResourceServerScope().getResourceServer().getKey())
+                        &&resourceOwnerToScope.getResourceServerScope().getResourceServer().getKey().equals(resourceServer.getKey())){
+                    resourceOwnerToScopeRepository.delete(resourceOwnerToScope.getId());
+                }
+            }
+        }
+    }
+
+    /**
+     * 删除系统和resourceOwnerName和ResourceServerId相关的Scopes以及APIs
+     * @param resourceOwnerName
+     * @param resourceServerId
+     * @return
+     */
+    @DELETE
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response unRegisterScopes(@QueryParam("resourceOwnerName") String resourceOwnerName, @QueryParam("resourceServerId") String resourceServerId){
+        ResourceOwner resourceOwner = resourceOwnerRepository.findByName(resourceOwnerName);
+        if(resourceOwner == null){
+            sendErrorResponse("invalid resourceOwnerName","resourceOwnerName 系统中不存在");
+        }
+
+        ResourceServer resourceServer = resourceServerRepository.findByKey(resourceServerId);
+        if(resourceServer == null){
+            sendErrorResponse("invalid resourceServerId","resourceServerId 系统中不存在");
+        }
+        deleteAllResourceOwnerScopes(resourceOwner, resourceServer);
+        return Response.status(Response.Status.OK).build();
+    }
+
 
     public static boolean validateHTTP_URI(String uri) {
         final URL url;
