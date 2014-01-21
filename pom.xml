@@ -48,21 +48,27 @@
   </scm>
 
 
-  <distributionManagement>
-    <repository>
-      <id>openconext-releases</id>
-      <name>OpenConext public releases repository</name>
-      <url>dav:https://build.surfconext.nl/repository/public/releases</url>
-    </repository>
-    <snapshotRepository>
-      <id>openconext-snapshots</id>
-      <name>OpenConext public snapshot repository</name>
-      <url>dav:https://build.surfconext.nl/repository/public/snapshots</url>
-    </snapshotRepository>
-  </distributionManagement>
+    <!-- Distribution Repositories -->
+    <distributionManagement>
+        <!-- repository for released products -->
+        <repository>
+            <id>${project.dist.repo.release.id}</id>
+            <name>${project.dist.repo.release.name}</name>
+            <url>${project.dist.repo.release.url}</url>
+        </repository>
+        <!-- repository for products' snapshotelopment snapshots -->
+        <snapshotRepository>
+            <uniqueVersion>false</uniqueVersion>
+            <id>${project.dist.repo.snapshot.id}</id>
+            <name>${project.dist.repo.snapshot.name}</name>
+            <url>${project.dist.repo.snapshot.url}</url>
+        </snapshotRepository>
+
+    </distributionManagement>
 
 
-  <modules>
+
+    <modules>
     <module>apis-resource-server-library</module>
     <module>apis-example-resource-server</module>
     <module>apis-authorization-server</module>
@@ -75,6 +81,18 @@
   </modules>
 
   <properties>
+      <project.dist.repo.release.id>artifactory</project.dist.repo.release.id>
+      <project.dist.repo.release.name> Netease Repository
+      </project.dist.repo.release.name>
+      <project.dist.repo.release.url>
+          http://mvn.hz.netease.com/artifactory/libs-releases
+      </project.dist.repo.release.url>
+      <project.dist.repo.snapshot.id>snapshots</project.dist.repo.snapshot.id>
+      <project.dist.repo.snapshot.name> Netease Snaptshot Repository
+      </project.dist.repo.snapshot.name>
+      <project.dist.repo.snapshot.url>
+          http://mvn.hz.netease.com/artifactory/libs-snapshots
+      </project.dist.repo.snapshot.url>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <!-- all the versions in the oa-aas project -->
